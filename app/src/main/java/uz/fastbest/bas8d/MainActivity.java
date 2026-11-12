@@ -2,134 +2,151 @@ package uz.fastbest.bas8d;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ClipData;
 import android.content.ComponentName;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Typeface;
-import android.util.LruCache;
-import android.util.Size;
-import android.widget.ImageView;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.SeekBar;
-import android.widget.Switch;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
+import java.util.TreeMap;
+import java.util.function.Supplier;
+
+import uz.fastbest.bas8d.PlayerService.Track;
+
+import static uz.fastbest.bas8d.Ui.BAR;
+import static uz.fastbest.bas8d.Ui.BG;
+import static uz.fastbest.bas8d.Ui.ICON;
+import static uz.fastbest.bas8d.Ui.MP;
+import static uz.fastbest.bas8d.Ui.ORANGE;
+import static uz.fastbest.bas8d.Ui.SUB;
+import static uz.fastbest.bas8d.Ui.TXT;
+import static uz.fastbest.bas8d.Ui.WC;
 
 public class MainActivity extends Activity {
 
-    interface IntCb { void on(int v); }
-    interface Fmt { String f(int v); }
+    // ---------- veri modeli ----------
 
-    static final int BG = 0xFF0E0F14, CARD = 0xFF1A1C25, ACC = 0xFF7C5CFF, ACC2 = 0xFF35D6C3,
-            TXT = 0xFFFFFFFF, SUB = 0xFF9AA0B4;
+    static class Row {
+        static final int HEADER = 0, GROUP = 1, TRACK = 2, ACTION = 3;
+        int type;
+        String title = "", sub = "";
+        int icon;
+        Track t;
+        List<Track> group;
+        Runnable click;
+        Runnable more;
+    }
+
+    static class Level {
+        String title;
+        Supplier<List<Row>> build;
+        Level(String title, Supplier<List<Row>> build) { this.title = title; this.build = build; }
+    }
+
+    private static final String[] SECTION_NAMES = {"Görüntü", "Ses", "Göz at", "Listeler", "Diğerleri"};
+    private static final int[] SECTION_ICONS = {R.drawable.ic_movie, R.drawable.ic_note, R.drawable.ic_folder,
+            R.drawable.ic_queue, R.drawable.ic_more_horiz};
+    private static final String[][] SUBTABS = {
+            {"KLASÖRLER", "TÜM VİDEOLAR"},
+            {"KLASÖRLER", "KAYITLAR", "SANATÇILAR", "ALBÜMLER"},
+            {}, {}, {}};
 
     private PlayerService svc;
     private final Handler h = new Handler(Looper.getMainLooper());
+    private SharedPreferences sp;
 
-    private final List<PlayerService.Track> all = new ArrayList<>();
-    private final List<PlayerService.Track> shown = new ArrayList<>();
-    private String filter = "";
+    private int section = 1;
+    private final int[] subTab = {0, 0, 0, 0, 0};
+    private final ArrayList<Level> stack = new ArrayList<>();
+    private String query;
+    private List<Row> rows = new ArrayList<>();
+    private boolean loading = true;
 
-    private FrameLayout content;
-    private View songsView;
-    private TextView[] tabs;
-    private int tab;
+    // görünümler
+    private LinearLayout topBar;
+    private HorizontalScrollView tabScroll;
+    private LinearLayout tabRow;
     private ListView listView;
+    private RowAdapter adapter;
     private TextView emptyView;
-    private SongAdapter adapter;
+    private ImageView fab;
+    private LinearLayout mini;
+    private TextView miniTitle, miniSub, miniTime;
+    private ImageView miniPlay;
+    private ProgressBar miniProg;
+    private final LinearLayout[] navItems = new LinearLayout[5];
+    private String lastUri = "";
 
-    private TextView npTitle, npArtist, tCur, tDur, bPlay, bShuffle, bRepeat;
-    private SeekBar seek;
-    private boolean dragging;
+    private final Runnable uiListener = () -> h.post(this::refreshMini);
 
     private final ServiceConnection conn = new ServiceConnection() {
         @Override public void onServiceConnected(ComponentName n, IBinder b) {
             svc = ((PlayerService.LocalBinder) b).get();
             svc.listeners.add(uiListener);
-            showTab(tab);
-            refresh();
+            refreshMini();
         }
         @Override public void onServiceDisconnected(ComponentName n) { svc = null; }
     };
 
-    private final Runnable uiListener = new Runnable() {
-        @Override public void run() { h.post(new Runnable() { @Override public void run() { refresh(); } }); }
-    };
-
-    // videolar
-    private final List<PlayerService.Track> vAll = new ArrayList<>();
-    private final List<PlayerService.Track> vShown = new ArrayList<>();
-    private String vFilter = "";
-    private View videosView;
-    private TextView vEmpty;
-    private VideoAdapter vAdapter;
-    private final LruCache<String, Bitmap> thumbs = new LruCache<>(80);
-    private final ExecutorService pool = Executors.newFixedThreadPool(2);
-
     private final Runnable tick = new Runnable() {
         @Override public void run() {
-            refresh();
+            refreshMini();
             h.postDelayed(this, 500);
         }
     };
 
+    private int dp(float v) { return Ui.dp(this, v); }
+
     @Override protected void onCreate(Bundle s) {
         super.onCreate(s);
-        getWindow().setStatusBarColor(BG);
-        getWindow().setNavigationBarColor(BG);
+        sp = Ui.prefs(this);
+        section = sp.getInt("section", 1);
+        getWindow().setStatusBarColor(BAR);
+        getWindow().setNavigationBarColor(BAR);
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         buildUi();
         Intent i = new Intent(this, PlayerService.class);
         startService(i);
         bindService(i, conn, Context.BIND_AUTO_CREATE);
         askPermission();
-        tab = getIntent().getIntExtra("tab", 0);
-        showTab(tab);
-    }
-
-    @Override protected void onNewIntent(Intent in) {
-        super.onNewIntent(in);
-        if (in != null && in.hasExtra("tab")) showTab(in.getIntExtra("tab", 0));
+        render();
     }
 
     @Override protected void onResume() {
         super.onResume();
         h.removeCallbacks(tick);
         h.post(tick);
+        if (section == 3 || section == 4) render();
     }
 
     @Override protected void onPause() {
@@ -147,16 +164,24 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
-    // ---------- izin ve şarkı listesi ----------
+    @Override public void onBackPressed() {
+        if (query != null) { closeSearch(); return; }
+        if (!stack.isEmpty()) {
+            stack.remove(stack.size() - 1);
+            render();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    // ---------- izin ve kitaplık ----------
 
     private String audioPerm() {
-        return Build.VERSION.SDK_INT >= 33 ? Manifest.permission.READ_MEDIA_AUDIO
-                : Manifest.permission.READ_EXTERNAL_STORAGE;
+        return Build.VERSION.SDK_INT >= 33 ? Manifest.permission.READ_MEDIA_AUDIO : Manifest.permission.READ_EXTERNAL_STORAGE;
     }
 
     private String videoPerm() {
-        return Build.VERSION.SDK_INT >= 33 ? Manifest.permission.READ_MEDIA_VIDEO
-                : Manifest.permission.READ_EXTERNAL_STORAGE;
+        return Build.VERSION.SDK_INT >= 33 ? Manifest.permission.READ_MEDIA_VIDEO : Manifest.permission.READ_EXTERNAL_STORAGE;
     }
 
     private boolean granted(String p) {
@@ -164,11 +189,7 @@ public class MainActivity extends Activity {
     }
 
     private void askPermission() {
-        if (granted(audioPerm()) && granted(videoPerm())) {
-            loadSongs();
-            loadVideos();
-            return;
-        }
+        if (granted(audioPerm()) && granted(videoPerm())) { loadLibrary(); return; }
         if (Build.VERSION.SDK_INT >= 33) {
             requestPermissions(new String[]{audioPerm(), videoPerm(), Manifest.permission.POST_NOTIFICATIONS}, 1);
         } else {
@@ -177,887 +198,740 @@ public class MainActivity extends Activity {
     }
 
     @Override public void onRequestPermissionsResult(int code, String[] p, int[] r) {
-        if (granted(audioPerm())) loadSongs();
-        else applyFilter();
-        if (granted(videoPerm())) loadVideos();
-        else applyVideoFilter();
+        loadLibrary();
     }
 
-    private void loadSongs() {
-        new Thread(new Runnable() {
-            @Override public void run() {
-                final List<PlayerService.Track> found = new ArrayList<>();
-                try {
-                    Uri base = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                    Cursor c = getContentResolver().query(base,
-                            new String[]{MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE,
-                                    MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.DURATION},
-                            MediaStore.Audio.Media.IS_MUSIC + "!=0", null,
-                            MediaStore.Audio.Media.TITLE + " COLLATE NOCASE");
-                    if (c != null) {
-                        while (c.moveToNext()) {
-                            PlayerService.Track t = new PlayerService.Track();
-                            t.uri = ContentUris.withAppendedId(base, c.getLong(0));
-                            t.title = c.getString(1) == null ? "Adsız" : c.getString(1);
-                            String a = c.getString(2);
-                            t.artist = a == null || a.equals("<unknown>") ? "Bilinmeyen sanatçı" : a;
-                            t.dur = c.getLong(3);
-                            found.add(t);
-                        }
-                        c.close();
-                    }
-                } catch (Exception ignored) {}
-                h.post(new Runnable() {
-                    @Override public void run() {
-                        List<PlayerService.Track> added = new ArrayList<>();
-                        for (PlayerService.Track t : all) {
-                            if (!"content".equals(t.uri.getScheme())
-                                    || !"media".equals(t.uri.getAuthority())) added.add(t);
-                        }
-                        all.clear();
-                        all.addAll(added);
-                        all.addAll(found);
-                        applyFilter();
-                    }
-                });
-            }
+    private void loadLibrary() {
+        loading = true;
+        final boolean a = granted(audioPerm()), v = granted(videoPerm());
+        new Thread(() -> {
+            final List<Track> au = a ? Lib.query(this, false) : new ArrayList<>();
+            final List<Track> vi = v ? Lib.query(this, true) : new ArrayList<>();
+            h.post(() -> {
+                Lib.audio.clear();
+                Lib.audio.addAll(au);
+                Lib.video.clear();
+                Lib.video.addAll(vi);
+                Lib.loaded = true;
+                loading = false;
+                render();
+            });
         }).start();
     }
 
-    private void applyFilter() {
-        shown.clear();
-        String f = filter.toLowerCase(Locale.ROOT).trim();
-        for (PlayerService.Track t : all) {
-            if (f.isEmpty() || t.title.toLowerCase(Locale.ROOT).contains(f)
-                    || t.artist.toLowerCase(Locale.ROOT).contains(f)) shown.add(t);
-        }
-        if (adapter != null) adapter.notifyDataSetChanged();
-        if (emptyView != null) {
-            boolean granted = checkSelfPermission(audioPerm()) == PackageManager.PERMISSION_GRANTED;
-            emptyView.setVisibility(shown.isEmpty() ? View.VISIBLE : View.GONE);
-            emptyView.setText(!granted
-                    ? "Telefondaki müzikleri göstermek için izin gerekli.\nİzin vermek için buraya dokunun veya \"Dosya aç\" ile şarkı seçin."
-                    : all.isEmpty() ? "Telefonda müzik bulunamadı.\n\"Dosya aç\" ile şarkı seçebilirsiniz."
-                    : "Aramaya uygun şarkı yok.");
-        }
-    }
-
-    private void openFiles() {
-        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        i.addCategory(Intent.CATEGORY_OPENABLE);
-        i.setType("*/*");
-        i.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/*", "video/*"});
-        i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        try { startActivityForResult(i, 2); }
-        catch (Exception e) { Toast.makeText(this, "Dosya seçici açılamadı", Toast.LENGTH_SHORT).show(); }
-    }
-
-    @Override protected void onActivityResult(int req, int res, Intent data) {
-        super.onActivityResult(req, res, data);
-        if (req != 2 || res != RESULT_OK || data == null) return;
-        List<Uri> uris = new ArrayList<>();
-        ClipData cd = data.getClipData();
-        if (cd != null) for (int i = 0; i < cd.getItemCount(); i++) uris.add(cd.getItemAt(i).getUri());
-        else if (data.getData() != null) uris.add(data.getData());
-        if (uris.isEmpty()) return;
-        List<PlayerService.Track> picked = new ArrayList<>();
-        List<PlayerService.Track> vPicked = new ArrayList<>();
-        for (Uri u : uris) {
-            try {
-                getContentResolver().takePersistableUriPermission(u, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            } catch (Exception ignored) {}
-            PlayerService.Track t = new PlayerService.Track();
-            t.uri = u;
-            t.title = fileName(u);
-            String mime = null;
-            try { mime = getContentResolver().getType(u); } catch (Exception ignored) {}
-            t.video = mime != null && mime.startsWith("video");
-            t.artist = t.video ? "Seçilen video" : "Seçilen dosya";
-            (t.video ? vPicked : picked).add(t);
-        }
-        if (!vPicked.isEmpty()) {
-            vAll.addAll(0, vPicked);
-            vFilter = "";
-            applyVideoFilter();
-            showTab(1);
-            if (svc != null) {
-                startService(new Intent(this, PlayerService.class));
-                svc.setList(vPicked, 0);
-                startActivity(new Intent(this, VideoActivity.class));
-            }
-            if (!picked.isEmpty()) { all.addAll(0, picked); applyFilter(); }
-            return;
-        }
-        all.addAll(0, picked);
-        filter = "";
-        applyFilter();
-        if (svc != null) {
-            startService(new Intent(this, PlayerService.class));
-            svc.setList(shown, 0);
-        }
-    }
-
-    private String fileName(Uri u) {
-        String name = null;
-        try {
-            Cursor c = getContentResolver().query(u, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
-            if (c != null) {
-                if (c.moveToFirst()) name = c.getString(0);
-                c.close();
-            }
-        } catch (Exception ignored) {}
-        if (name == null) name = u.getLastPathSegment();
-        if (name == null) return "Şarkı";
-        int dot = name.lastIndexOf('.');
-        return dot > 0 ? name.substring(0, dot) : name;
-    }
-
-    // ---------- arayüz ----------
-
-    private int dp(float v) { return Math.round(v * getResources().getDisplayMetrics().density); }
-
-    private GradientDrawable round(int color, float r) {
-        GradientDrawable g = new GradientDrawable();
-        g.setColor(color);
-        g.setCornerRadius(dp(r));
-        return g;
-    }
-
-    private TextView text(String s, float sp, int color, boolean bold) {
-        TextView t = new TextView(this);
-        t.setText(s);
-        t.setTextSize(sp);
-        t.setTextColor(color);
-        if (bold) t.setTypeface(Typeface.DEFAULT_BOLD);
-        return t;
-    }
-
-    private LinearLayout.LayoutParams lp(int w, int hgt, float weight) {
-        return new LinearLayout.LayoutParams(w, hgt, weight);
-    }
-
-    private static final int MP = ViewGroup.LayoutParams.MATCH_PARENT, WC = ViewGroup.LayoutParams.WRAP_CONTENT;
+    // ---------- arayüz iskeleti ----------
 
     private void buildUi() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(BG);
-        root.setFitsSystemWindows(true);
 
-        TextView title = text("Bas8D Müzik", 20, TXT, true);
-        title.setPadding(dp(18), dp(14), dp(18), dp(8));
-        root.addView(title);
+        topBar = new LinearLayout(this);
+        topBar.setBackgroundColor(BAR);
+        topBar.setGravity(Gravity.CENTER_VERTICAL);
+        topBar.setMinimumHeight(dp(64));
+        root.addView(topBar, new LinearLayout.LayoutParams(MP, WC));
 
-        LinearLayout tabRow = new LinearLayout(this);
-        tabRow.setPadding(dp(12), 0, dp(12), dp(8));
-        String[] names = {"Şarkılar", "Videolar", "Ekolayzır", "8D Efekt"};
-        tabs = new TextView[names.length];
-        for (int i = 0; i < names.length; i++) {
-            final int k = i;
-            TextView t = text(names[i], 12.5f, TXT, true);
-            t.setSingleLine(true);
-            t.setGravity(Gravity.CENTER);
-            t.setPadding(0, dp(10), 0, dp(10));
-            t.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) { showTab(k); }
-            });
-            LinearLayout.LayoutParams p = lp(0, WC, 1);
-            p.setMargins(dp(3), 0, dp(3), 0);
-            tabRow.addView(t, p);
-            tabs[i] = t;
-        }
-        root.addView(tabRow);
+        tabScroll = new HorizontalScrollView(this);
+        tabScroll.setHorizontalScrollBarEnabled(false);
+        tabScroll.setBackgroundColor(BAR);
+        tabRow = new LinearLayout(this);
+        tabScroll.addView(tabRow);
+        root.addView(tabScroll, new LinearLayout.LayoutParams(MP, WC));
 
-        content = new FrameLayout(this);
-        root.addView(content, lp(MP, 0, 1));
-
-        root.addView(buildPlayerBar());
-        setContentView(root);
-        songsView = buildSongs();
-        videosView = buildVideos();
-    }
-
-    private void showTab(int k) {
-        tab = k;
-        for (int i = 0; i < tabs.length; i++) {
-            tabs[i].setBackground(round(i == k ? ACC : CARD, 12));
-            tabs[i].setTextColor(i == k ? TXT : SUB);
-        }
-        content.removeAllViews();
-        if (k == 0) content.addView(songsView);
-        else if (k == 1) content.addView(videosView);
-        else if (svc == null) content.addView(text("Yükleniyor…", 14, SUB, false));
-        else content.addView(k == 2 ? buildEq() : buildFx());
-    }
-
-    private View buildSongs() {
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-
-        LinearLayout top = new LinearLayout(this);
-        top.setGravity(Gravity.CENTER_VERTICAL);
-        top.setPadding(dp(16), 0, dp(16), dp(8));
-        EditText search = new EditText(this);
-        search.setHint("Şarkı veya sanatçı ara");
-        search.setHintTextColor(SUB);
-        search.setTextColor(TXT);
-        search.setTextSize(14);
-        search.setSingleLine(true);
-        search.setBackground(round(CARD, 12));
-        search.setPadding(dp(14), dp(10), dp(14), dp(10));
-        search.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void afterTextChanged(Editable s) {
-                filter = s.toString();
-                applyFilter();
-            }
-        });
-        top.addView(search, lp(0, WC, 1));
-        TextView open = text("Dosya aç", 13, TXT, true);
-        open.setBackground(round(ACC, 12));
-        open.setPadding(dp(14), dp(11), dp(14), dp(11));
-        open.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { openFiles(); }
-        });
-        LinearLayout.LayoutParams op = lp(WC, WC, 0);
-        op.leftMargin = dp(8);
-        top.addView(open, op);
-        box.addView(top);
-
-        FrameLayout f = new FrameLayout(this);
+        FrameLayout content = new FrameLayout(this);
         listView = new ListView(this);
         listView.setDivider(null);
         listView.setSelector(new android.graphics.drawable.ColorDrawable(0));
-        adapter = new SongAdapter();
+        listView.setFastScrollEnabled(true);
+        listView.setClipToPadding(false);
+        listView.setPadding(0, dp(4), 0, dp(90));
+        adapter = new RowAdapter();
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
-            @Override public void onItemClick(android.widget.AdapterView<?> p, View v, int pos, long id) {
-                if (svc == null) return;
-                startService(new Intent(MainActivity.this, PlayerService.class));
-                svc.setList(shown, pos);
-            }
+        listView.setOnItemClickListener((p, v, pos, id) -> {
+            Row r = rows.get(pos);
+            if (r.click != null) r.click.run();
         });
-        f.addView(listView);
-        emptyView = text("Şarkılar yükleniyor…", 14, SUB, false);
+        listView.setOnItemLongClickListener((p, v, pos, id) -> {
+            Row r = rows.get(pos);
+            if (r.more != null) { r.more.run(); return true; }
+            return false;
+        });
+        content.addView(listView);
+
+        emptyView = Ui.text(this, "", 15, SUB, false);
         emptyView.setGravity(Gravity.CENTER);
         emptyView.setPadding(dp(32), dp(32), dp(32), dp(32));
-        emptyView.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (checkSelfPermission(audioPerm()) != PackageManager.PERMISSION_GRANTED) askPermission();
-            }
+        emptyView.setOnClickListener(v -> { if (!granted(audioPerm()) || !granted(videoPerm())) askPermission(); });
+        content.addView(emptyView, new FrameLayout.LayoutParams(MP, MP));
+
+        fab = new ImageView(this);
+        fab.setImageDrawable(Ui.icon(this, R.drawable.ic_shuffle, TXT));
+        fab.setPadding(dp(17), dp(17), dp(17), dp(17));
+        fab.setBackground(Ui.circle(ORANGE, 0, 0));
+        fab.setElevation(dp(6));
+        FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(dp(60), dp(60), Gravity.BOTTOM | Gravity.END);
+        fp.setMargins(0, 0, dp(18), dp(18));
+        content.addView(fab, fp);
+        fab.setOnClickListener(v -> shuffleAll());
+        root.addView(content, new LinearLayout.LayoutParams(MP, 0, 1));
+
+        root.addView(buildMini());
+
+        View line = new View(this);
+        line.setBackgroundColor(0xFF2A2A2A);
+        root.addView(line, new LinearLayout.LayoutParams(MP, 1));
+
+        LinearLayout nav = new LinearLayout(this);
+        nav.setBackgroundColor(BAR);
+        nav.setPadding(0, dp(8), 0, dp(8));
+        for (int i = 0; i < 5; i++) {
+            final int k = i;
+            LinearLayout it = new LinearLayout(this);
+            it.setOrientation(LinearLayout.VERTICAL);
+            it.setGravity(Gravity.CENTER);
+            Ui.ripple(it, true);
+            ImageView iv = Ui.img(this, SECTION_ICONS[i], ICON, 28, 0);
+            it.addView(iv);
+            TextView t = Ui.text(this, SECTION_NAMES[i], 13, ICON, false);
+            t.setPadding(0, dp(3), 0, 0);
+            t.setSingleLine(true);
+            it.addView(t);
+            it.setOnClickListener(v -> {
+                if (section == k && !stack.isEmpty()) stack.clear();
+                section = k;
+                stack.clear();
+                query = null;
+                sp.edit().putInt("section", k).apply();
+                render();
+                listView.setSelection(0);
+            });
+            nav.addView(it, new LinearLayout.LayoutParams(0, WC, 1));
+            navItems[i] = it;
+        }
+        root.addView(nav, new LinearLayout.LayoutParams(MP, WC));
+        setContentView(root);
+    }
+
+    private View buildMini() {
+        mini = new LinearLayout(this);
+        mini.setOrientation(LinearLayout.VERTICAL);
+        mini.setBackgroundColor(BAR);
+        miniProg = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        miniProg.setProgressTintList(android.content.res.ColorStateList.valueOf(ORANGE));
+        miniProg.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF3A3A3A));
+        miniProg.setMax(1000);
+        mini.addView(miniProg, new LinearLayout.LayoutParams(MP, dp(3)));
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(18), dp(8), dp(12), dp(8));
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        miniTitle = Ui.text(this, "", 17, TXT, false);
+        miniTitle.setSingleLine(true);
+        miniTitle.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        miniTitle.setMarqueeRepeatLimit(-1);
+        miniTitle.setSelected(true);
+        miniSub = Ui.text(this, "", 14, SUB, false);
+        miniSub.setSingleLine(true);
+        miniSub.setEllipsize(TextUtils.TruncateAt.END);
+        col.addView(miniTitle);
+        col.addView(miniSub);
+        row.addView(col, new LinearLayout.LayoutParams(0, WC, 1));
+        miniTime = Ui.text(this, "", 15, TXT, false);
+        miniTime.setPadding(dp(10), 0, dp(14), 0);
+        row.addView(miniTime);
+        miniPlay = new ImageView(this);
+        miniPlay.setImageDrawable(Ui.icon(this, R.drawable.ic_pause, TXT));
+        miniPlay.setPadding(dp(11), dp(11), dp(11), dp(11));
+        miniPlay.setBackground(Ui.circle(0, TXT, dp(2)));
+        miniPlay.setOnClickListener(v -> { if (svc != null) svc.toggle(); });
+        row.addView(miniPlay, new LinearLayout.LayoutParams(dp(46), dp(46)));
+        mini.addView(row);
+        mini.setOnClickListener(v -> openPlayer());
+        mini.setVisibility(View.GONE);
+        return mini;
+    }
+
+    private void openPlayer() {
+        if (svc == null || svc.current() == null) return;
+        startActivity(new Intent(this, svc.current().video ? VideoActivity.class : AudioActivity.class));
+    }
+
+    private void refreshMini() {
+        if (svc == null || mini == null) return;
+        Track t = svc.current();
+        if (t == null) { mini.setVisibility(View.GONE); return; }
+        mini.setVisibility(View.VISIBLE);
+        if (!t.title.equals(miniTitle.getText().toString())) miniTitle.setText(t.title);
+        miniSub.setText(t.video ? Lib.folderName(t.folder) : t.artist);
+        int d = svc.duration(), p = svc.position();
+        miniTime.setText(Ui.time(p));
+        miniProg.setProgress(d > 0 ? (int) (p * 1000L / d) : 0);
+        miniPlay.setImageDrawable(Ui.icon(this, svc.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play, TXT));
+        String u = t.uri.toString();
+        if (!u.equals(lastUri)) {
+            lastUri = u;
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    // ---------- üst çubuk ----------
+
+    private void buildTopBar() {
+        topBar.removeAllViews();
+        if (query != null) {
+            topBar.setPadding(dp(4), 0, dp(4), 0);
+            topBar.addView(Ui.btn(this, R.drawable.ic_back, TXT, 24, 12, v -> closeSearch()));
+            final EditText e = new EditText(this);
+            e.setHint("Kitaplıkta ara");
+            e.setHintTextColor(SUB);
+            e.setTextColor(TXT);
+            e.setTextSize(18);
+            e.setSingleLine(true);
+            e.setBackground(null);
+            e.setText(query);
+            e.setSelection(query.length());
+            e.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
+                @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
+                @Override public void afterTextChanged(Editable s) {
+                    query = s.toString();
+                    rows = buildRows();
+                    adapter.notifyDataSetChanged();
+                    updateEmpty();
+                }
+            });
+            topBar.addView(e, new LinearLayout.LayoutParams(0, WC, 1));
+            topBar.addView(Ui.btn(this, R.drawable.ic_close, TXT, 24, 12, v -> {
+                if (e.getText().length() > 0) e.setText(""); else closeSearch();
+            }));
+            e.requestFocus();
+            h.postDelayed(() -> {
+                InputMethodManager im = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                if (im != null) im.showSoftInput(e, 0);
+            }, 150);
+            return;
+        }
+        if (stack.isEmpty()) {
+            topBar.setPadding(dp(16), 0, dp(4), 0);
+            ImageView logo = new ImageView(this);
+            logo.setImageResource(R.drawable.ic_launcher);
+            topBar.addView(logo, new LinearLayout.LayoutParams(dp(40), dp(40)));
+            TextView t = Ui.text(this, "Bas8D", 26, TXT, true);
+            t.setPadding(dp(16), 0, 0, 0);
+            topBar.addView(t, new LinearLayout.LayoutParams(0, WC, 1));
+        } else {
+            topBar.setPadding(dp(4), 0, dp(4), 0);
+            topBar.addView(Ui.btn(this, R.drawable.ic_back, TXT, 24, 12, v -> onBackPressed()));
+            TextView t = Ui.text(this, stack.get(stack.size() - 1).title, 20, TXT, true);
+            t.setSingleLine(true);
+            t.setEllipsize(TextUtils.TruncateAt.END);
+            t.setPadding(dp(8), 0, 0, 0);
+            topBar.addView(t, new LinearLayout.LayoutParams(0, WC, 1));
+        }
+        topBar.addView(Ui.btn(this, R.drawable.ic_search, TXT, 28, 12, v -> {
+            query = "";
+            render();
+        }));
+        topBar.addView(Ui.btn(this, R.drawable.ic_history, TXT, 28, 12, v -> openHistory()));
+        topBar.addView(Ui.btn(this, R.drawable.ic_more_vert, TXT, 28, 10, this::topMenu));
+    }
+
+    private void closeSearch() {
+        query = null;
+        InputMethodManager im = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (im != null) im.hideSoftInputFromWindow(topBar.getWindowToken(), 0);
+        render();
+    }
+
+    private void topMenu(View anchor) {
+        int sort = sp.getInt("sort", 0);
+        String[] labels = {sort == 0 ? "✓ Ada göre sırala" : "Ada göre sırala",
+                sort == 1 ? "✓ Tarihe göre sırala" : "Tarihe göre sırala",
+                "Kitaplığı yenile", "Dengeleyici", "Denetim ayarları", "Uyku zamanlayıcı"};
+        int[] icons = {R.drawable.ic_sort, R.drawable.ic_history, R.drawable.ic_refresh, R.drawable.ic_tune,
+                R.drawable.ic_settings, R.drawable.ic_timer};
+        Ui.menu(anchor, labels, icons, k -> {
+            if (k == 0 || k == 1) { sp.edit().putInt("sort", k).apply(); render(); }
+            else if (k == 2) { loadLibrary(); Ui.toast(this, "Kitaplık yenileniyor…"); }
+            else if (k == 3) startActivity(new Intent(this, EffectsActivity.class));
+            else if (k == 4) Ui.controlSettings(this, false);
+            else if (k == 5 && svc != null) Ui.sleepDialog(this, svc);
         });
-        f.addView(emptyView, new FrameLayout.LayoutParams(MP, MP));
-        box.addView(f, lp(MP, 0, 1));
-        return box;
     }
 
-    // ---------- videolar ----------
+    // ---------- sekmeler ----------
 
-    private void loadVideos() {
-        new Thread(new Runnable() {
-            @Override public void run() {
-                final List<PlayerService.Track> found = new ArrayList<>();
-                try {
-                    Uri base = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                    Cursor c = getContentResolver().query(base,
-                            new String[]{MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME,
-                                    MediaStore.Video.Media.BUCKET_DISPLAY_NAME, MediaStore.Video.Media.DURATION},
-                            null, null, MediaStore.Video.Media.DATE_ADDED + " DESC");
-                    if (c != null) {
-                        while (c.moveToNext()) {
-                            PlayerService.Track t = new PlayerService.Track();
-                            t.id = c.getLong(0);
-                            t.uri = ContentUris.withAppendedId(base, t.id);
-                            String n = c.getString(1) == null ? "Video" : c.getString(1);
-                            int dot = n.lastIndexOf('.');
-                            t.title = dot > 0 ? n.substring(0, dot) : n;
-                            t.artist = c.getString(2) == null ? "Video" : c.getString(2);
-                            t.dur = c.getLong(3);
-                            t.video = true;
-                            found.add(t);
-                        }
-                        c.close();
-                    }
-                } catch (Exception ignored) {}
-                h.post(new Runnable() {
-                    @Override public void run() {
-                        List<PlayerService.Track> added = new ArrayList<>();
-                        for (PlayerService.Track t : vAll) if (t.id == 0) added.add(t);
-                        vAll.clear();
-                        vAll.addAll(added);
-                        vAll.addAll(found);
-                        applyVideoFilter();
-                    }
-                });
+    private void buildTabs() {
+        tabRow.removeAllViews();
+        String[] names = SUBTABS[section];
+        boolean show = stack.isEmpty() && query == null && names.length > 0;
+        tabScroll.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (!show) return;
+        for (int i = 0; i < names.length; i++) {
+            final int k = i;
+            TextView t = Ui.text(this, names[i], 16, i == subTab[section] ? ORANGE : TXT, true);
+            t.setLetterSpacing(0.08f);
+            t.setGravity(Gravity.CENTER);
+            t.setPadding(dp(20), dp(16), dp(20), dp(16));
+            t.setBackground(i == subTab[section] ? underline() : null);
+            t.setOnClickListener(v -> {
+                subTab[section] = k;
+                render();
+                listView.setSelection(0);
+            });
+            tabRow.addView(t);
+        }
+    }
+
+    private android.graphics.drawable.Drawable underline() {
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(BAR);
+        GradientDrawable line = new GradientDrawable();
+        line.setColor(ORANGE);
+        line.setCornerRadius(dp(2));
+        LayerDrawable ld = new LayerDrawable(new android.graphics.drawable.Drawable[]{bg, line});
+        ld.setLayerGravity(1, Gravity.BOTTOM | Gravity.FILL_HORIZONTAL);
+        ld.setLayerHeight(1, dp(4));
+        return ld;
+    }
+
+    // ---------- içerik ----------
+
+    private void render() {
+        buildTopBar();
+        buildTabs();
+        for (int i = 0; i < 5; i++) {
+            LinearLayout it = navItems[i];
+            int c = i == section ? ORANGE : ICON;
+            ((ImageView) it.getChildAt(0)).setImageDrawable(Ui.icon(this, SECTION_ICONS[i], c));
+            ((TextView) it.getChildAt(1)).setTextColor(c);
+        }
+        rows = buildRows();
+        adapter.notifyDataSetChanged();
+        updateEmpty();
+    }
+
+    private void updateEmpty() {
+        boolean empty = rows.isEmpty();
+        emptyView.setVisibility(empty ? View.VISIBLE : View.GONE);
+        if (empty) {
+            if (loading && query == null) emptyView.setText("Yükleniyor…");
+            else if (query != null) emptyView.setText(query.trim().isEmpty() ? "Aramak için yazın" : "Sonuç bulunamadı");
+            else if (!granted(audioPerm()) || !granted(videoPerm()))
+                emptyView.setText("Müzik ve videoları göstermek için izin gerekli.\nİzin vermek için dokunun.");
+            else if (section == 3 && stack.isEmpty())
+                emptyView.setText("Henüz liste yok.\nOynatıcı menüsünden \"Listeyi kaydet\" veya bir kaydın menüsünden \"Listeye ekle\" ile liste oluşturun.");
+            else emptyView.setText("Burada hiç kayıt yok");
+        }
+        int tracks = 0;
+        for (Row r : rows) if (r.type == Row.TRACK) tracks++;
+        fab.setVisibility(tracks > 1 && query == null ? View.VISIBLE : View.GONE);
+    }
+
+    private List<Row> buildRows() {
+        if (query != null) return trackRows(Lib.search(query), false, null);
+        if (!stack.isEmpty()) return stack.get(stack.size() - 1).build.get();
+        switch (section) {
+            case 0:
+                if (subTab[0] == 0) return groupRows(Lib.group(Lib.video, Lib.BY_FOLDER), R.drawable.ic_folder, "video");
+                return trackRows(sorted(Lib.video), sp.getInt("sort", 0) == 0, null);
+            case 1:
+                if (subTab[1] == 0) return groupRows(Lib.group(Lib.audio, Lib.BY_FOLDER), R.drawable.ic_folder, "kayıt");
+                if (subTab[1] == 1) return trackRows(sorted(Lib.audio), sp.getInt("sort", 0) == 0, null);
+                if (subTab[1] == 2) return groupRows(Lib.group(Lib.audio, Lib.BY_ARTIST), R.drawable.ic_person, "kayıt");
+                return groupRows(Lib.group(Lib.audio, Lib.BY_ALBUM), R.drawable.ic_album, "kayıt");
+            case 2:
+                return browseRoots();
+            case 3:
+                return playlistRows();
+            default:
+                return moreRows();
+        }
+    }
+
+    private List<Track> sorted(List<Track> src) {
+        List<Track> l = new ArrayList<>(src);
+        if (sp.getInt("sort", 0) == 0) Lib.sortByName(l); else Lib.sortByDate(l);
+        return l;
+    }
+
+    private List<Row> trackRows(List<Track> list, boolean headers, String playlistName) {
+        List<Row> out = new ArrayList<>();
+        String last = null;
+        for (int i = 0; i < list.size(); i++) {
+            final Track t = list.get(i);
+            final int idx = i;
+            if (headers) {
+                String c = t.title.isEmpty() ? "#" : t.title.substring(0, 1).toUpperCase(new Locale("tr"));
+                if (!Character.isLetter(c.charAt(0))) c = "#";
+                if (!c.equals(last)) {
+                    Row hr = new Row();
+                    hr.type = Row.HEADER;
+                    hr.title = c;
+                    out.add(hr);
+                    last = c;
+                }
             }
-        }).start();
+            Row r = new Row();
+            r.type = Row.TRACK;
+            r.t = t;
+            r.title = t.title;
+            if (t.video) r.sub = (t.dur > 0 ? Ui.time(t.dur) : "") + (t.w > 0 ? " · " + t.w + "×" + t.h : "");
+            else r.sub = (t.dur > 0 ? Ui.time(t.dur) + " · " : "") + t.artist;
+            r.click = () -> play(list, idx);
+            r.more = () -> trackMenu(t, list, idx, playlistName);
+            out.add(r);
+        }
+        return out;
     }
 
-    private void applyVideoFilter() {
-        vShown.clear();
-        String f = vFilter.toLowerCase(Locale.ROOT).trim();
-        for (PlayerService.Track t : vAll) {
-            if (f.isEmpty() || t.title.toLowerCase(Locale.ROOT).contains(f)
-                    || t.artist.toLowerCase(Locale.ROOT).contains(f)) vShown.add(t);
+    private List<Row> groupRows(List<Lib.Group> groups, int icon, String unit) {
+        List<Row> out = new ArrayList<>();
+        for (Lib.Group g : groups) {
+            Row r = new Row();
+            r.type = Row.GROUP;
+            r.icon = icon;
+            r.title = g.name;
+            r.sub = g.items.size() + " " + unit;
+            r.group = g.items;
+            final String title = g.name;
+            final List<Track> items = g.items;
+            r.click = () -> push(title, () -> trackRows(sorted(items), false, null));
+            r.more = () -> groupMenu(items);
+            out.add(r);
         }
-        if (vAdapter != null) vAdapter.notifyDataSetChanged();
-        if (vEmpty != null) {
-            vEmpty.setVisibility(vShown.isEmpty() ? View.VISIBLE : View.GONE);
-            vEmpty.setText(!granted(videoPerm())
-                    ? "Telefondaki videoları göstermek için izin gerekli.\nİzin vermek için buraya dokunun veya \"Dosya aç\" ile video seçin."
-                    : vAll.isEmpty() ? "Telefonda video bulunamadı.\n\"Dosya aç\" ile video seçebilirsiniz."
-                    : "Aramaya uygun video yok.");
-        }
+        return out;
     }
 
-    private View buildVideos() {
+    private void push(String title, Supplier<List<Row>> build) {
+        stack.add(new Level(title, build));
+        render();
+        listView.setSelection(0);
+    }
+
+    // Göz at
+    private List<Row> browseRoots() {
+        TreeMap<String, Integer> roots = new TreeMap<>();
+        for (Track t : Lib.all()) {
+            String r = Lib.storageRoot(t.path);
+            Integer n = roots.get(r);
+            roots.put(r, n == null ? 1 : n + 1);
+        }
+        List<Row> out = new ArrayList<>();
+        for (String r : roots.keySet()) {
+            Row row = new Row();
+            row.type = Row.GROUP;
+            row.icon = R.drawable.ic_storage;
+            row.title = Lib.rootName(r);
+            row.sub = roots.get(r) + " medya dosyası";
+            final String path = r;
+            final String title = row.title;
+            row.click = () -> push(title, () -> browse(path));
+            out.add(row);
+        }
+        return out;
+    }
+
+    private List<Row> browse(String dir) {
+        String pre = dir.endsWith("/") ? dir : dir + "/";
+        TreeMap<String, List<Track>> sub = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        List<Track> files = new ArrayList<>();
+        for (Track t : Lib.all()) {
+            if (!t.path.startsWith(pre)) continue;
+            String rest = t.path.substring(pre.length());
+            int s = rest.indexOf('/');
+            if (s < 0) files.add(t);
+            else {
+                String name = rest.substring(0, s);
+                List<Track> l = sub.get(name);
+                if (l == null) { l = new ArrayList<>(); sub.put(name, l); }
+                l.add(t);
+            }
+        }
+        List<Row> out = new ArrayList<>();
+        for (String name : sub.keySet()) {
+            Row r = new Row();
+            r.type = Row.GROUP;
+            r.icon = R.drawable.ic_folder;
+            r.title = name;
+            r.sub = sub.get(name).size() + " medya dosyası";
+            final String path = pre + name;
+            final List<Track> items = sub.get(name);
+            r.click = () -> push(name, () -> browse(path));
+            r.more = () -> groupMenu(items);
+            out.add(r);
+        }
+        Lib.sortByName(files);
+        out.addAll(trackRows(files, false, null));
+        return out;
+    }
+
+    // Listeler
+    private List<Row> playlistRows() {
+        List<Row> out = new ArrayList<>();
+        for (final String n : Lib.playlistNames(this)) {
+            final List<Track> l = Lib.playlist(this, n);
+            Row r = new Row();
+            r.type = Row.GROUP;
+            r.icon = R.drawable.ic_queue;
+            r.title = n;
+            r.sub = l.size() + " kayıt";
+            r.group = l;
+            r.click = () -> push(n, () -> trackRows(Lib.playlist(this, n), false, n));
+            r.more = () -> {
+                View anchor = listView;
+                Ui.menu(anchor, new String[]{"Çal", "Karışık çal", "Sıraya ekle", "Adını değiştir", "Sil"},
+                        new int[]{R.drawable.ic_play, R.drawable.ic_shuffle, R.drawable.ic_queue_play,
+                                R.drawable.ic_tune, R.drawable.ic_delete}, k -> {
+                            List<Track> cur = Lib.playlist(this, n);
+                            if (k == 0) play(cur, 0);
+                            else if (k == 1) shuffle(cur);
+                            else if (k == 2) enqueue(cur);
+                            else if (k == 3) renamePlaylist(n);
+                            else {
+                                Ui.dlg(this).setTitle("Silinsin mi?").setMessage("\"" + n + "\" listesi silinecek. Dosyalar silinmez.")
+                                        .setPositiveButton("Sil", (d, w) -> { Lib.deletePlaylist(this, n); render(); })
+                                        .setNegativeButton("İptal", null).show();
+                            }
+                        });
+            };
+            out.add(r);
+        }
+        return out;
+    }
+
+    private void renamePlaylist(String old) {
+        final EditText e = new EditText(this);
+        e.setText(old);
+        e.setSingleLine(true);
         LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-
-        LinearLayout top = new LinearLayout(this);
-        top.setGravity(Gravity.CENTER_VERTICAL);
-        top.setPadding(dp(16), 0, dp(16), dp(8));
-        EditText search = new EditText(this);
-        search.setHint("Video veya klasör ara");
-        search.setHintTextColor(SUB);
-        search.setTextColor(TXT);
-        search.setTextSize(14);
-        search.setSingleLine(true);
-        search.setBackground(round(CARD, 12));
-        search.setPadding(dp(14), dp(10), dp(14), dp(10));
-        search.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void afterTextChanged(Editable s) {
-                vFilter = s.toString();
-                applyVideoFilter();
-            }
-        });
-        top.addView(search, lp(0, WC, 1));
-        TextView open = text("Dosya aç", 13, TXT, true);
-        open.setBackground(round(ACC, 12));
-        open.setPadding(dp(14), dp(11), dp(14), dp(11));
-        open.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { openFiles(); }
-        });
-        LinearLayout.LayoutParams op = lp(WC, WC, 0);
-        op.leftMargin = dp(8);
-        top.addView(open, op);
-        box.addView(top);
-
-        FrameLayout f = new FrameLayout(this);
-        ListView lv = new ListView(this);
-        lv.setDivider(null);
-        lv.setSelector(new android.graphics.drawable.ColorDrawable(0));
-        vAdapter = new VideoAdapter();
-        lv.setAdapter(vAdapter);
-        lv.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
-            @Override public void onItemClick(android.widget.AdapterView<?> p, View v, int pos, long id) {
-                if (svc == null) return;
-                startService(new Intent(MainActivity.this, PlayerService.class));
-                svc.setList(vShown, pos);
-                startActivity(new Intent(MainActivity.this, VideoActivity.class));
-            }
-        });
-        f.addView(lv);
-        vEmpty = text("Videolar yükleniyor…", 14, SUB, false);
-        vEmpty.setGravity(Gravity.CENTER);
-        vEmpty.setPadding(dp(32), dp(32), dp(32), dp(32));
-        vEmpty.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (!granted(videoPerm())) askPermission();
-            }
-        });
-        f.addView(vEmpty, new FrameLayout.LayoutParams(MP, MP));
-        box.addView(f, lp(MP, 0, 1));
-        return box;
+        box.setPadding(dp(20), dp(8), dp(20), 0);
+        box.addView(e, new LinearLayout.LayoutParams(MP, WC));
+        Ui.dlg(this).setTitle("Adını değiştir").setView(box).setPositiveButton("Kaydet", (d, w) -> {
+            String n = e.getText().toString().trim();
+            if (n.isEmpty() || n.equals(old)) return;
+            List<Track> l = Lib.playlist(this, old);
+            Lib.deletePlaylist(this, old);
+            Lib.savePlaylist(this, n, l);
+            render();
+        }).setNegativeButton("İptal", null).show();
     }
 
-    private class VideoAdapter extends BaseAdapter {
-        @Override public int getCount() { return vShown.size(); }
-        @Override public Object getItem(int i) { return vShown.get(i); }
-        @Override public long getItemId(int i) { return i; }
-        @Override public View getView(int i, View cv, ViewGroup parent) {
-            LinearLayout row = (LinearLayout) cv;
-            if (row == null) {
-                row = new LinearLayout(MainActivity.this);
-                row.setGravity(Gravity.CENTER_VERTICAL);
-                row.setPadding(dp(16), dp(7), dp(16), dp(7));
-                ImageView iv = new ImageView(MainActivity.this);
-                iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                iv.setBackground(round(CARD, 10));
-                iv.setClipToOutline(true);
-                row.addView(iv, lp(dp(120), dp(68), 0));
-                LinearLayout col = new LinearLayout(MainActivity.this);
-                col.setOrientation(LinearLayout.VERTICAL);
-                col.setPadding(dp(12), 0, 0, 0);
-                TextView a = text("", 14, TXT, false);
-                a.setMaxLines(2);
-                a.setEllipsize(TextUtils.TruncateAt.END);
-                TextView b = text("", 12, SUB, false);
-                b.setSingleLine(true);
-                b.setEllipsize(TextUtils.TruncateAt.END);
-                col.addView(a);
-                col.addView(b);
-                row.addView(col, lp(0, WC, 1));
+    // Diğerleri
+    private List<Row> moreRows() {
+        List<Row> out = new ArrayList<>();
+        out.add(action("Geçmiş", "Son oynatılan kayıtlar", R.drawable.ic_history, this::openHistory));
+        out.add(action("Dengeleyici", "Bas, tiz ve ekolayzır", R.drawable.ic_tune,
+                () -> startActivity(new Intent(this, EffectsActivity.class).putExtra("tab", 0))));
+        out.add(action("8D ses ve efektler", "8D, ses yükseltme, surround, yankı, perde", R.drawable.ic_headset,
+                () -> startActivity(new Intent(this, EffectsActivity.class).putExtra("tab", 1))));
+        out.add(action("Uyku zamanlayıcı", "Belirlenen süre sonunda oynatmayı durdur", R.drawable.ic_timer,
+                () -> { if (svc != null) Ui.sleepDialog(this, svc); }));
+        out.add(action("Denetim ayarları", "Atlama süresi, jestler, kulaklık", R.drawable.ic_settings,
+                () -> Ui.controlSettings(this, false)));
+        out.add(action("Kitaplığı yenile", Lib.audio.size() + " ses, " + Lib.video.size() + " video", R.drawable.ic_refresh,
+                () -> { loadLibrary(); Ui.toast(this, "Kitaplık yenileniyor…"); }));
+        out.add(action("Hakkında", "Bas8D Oynatıcı", R.drawable.ic_info, () -> Ui.tips(this, "Bas8D Oynatıcı",
+                "Kulaklık için müzik ve video oynatıcı.\n\nBas, tiz, ekolayzır, 8D ses, ses yükseltme, surround, yankı, hız ve perde ayarları hem müzikte hem videoda çalışır.")));
+        return out;
+    }
+
+    private Row action(String title, String sub, int icon, Runnable click) {
+        Row r = new Row();
+        r.type = Row.ACTION;
+        r.title = title;
+        r.sub = sub;
+        r.icon = icon;
+        r.click = click;
+        return r;
+    }
+
+    private void openHistory() {
+        query = null;
+        push("Geçmiş", () -> {
+            List<Track> hist = Lib.history(this);
+            List<Row> out = new ArrayList<>();
+            if (!hist.isEmpty()) out.add(action("Geçmişi temizle", hist.size() + " kayıt", R.drawable.ic_delete, () ->
+                    Ui.dlg(this).setTitle("Geçmiş temizlensin mi?")
+                            .setPositiveButton("Temizle", (d, w) -> { Lib.clearHistory(this); render(); })
+                            .setNegativeButton("İptal", null).show()));
+            out.addAll(trackRows(hist, false, null));
+            return out;
+        });
+    }
+
+    // ---------- oynatma ----------
+
+    private void play(List<Track> l, int i) {
+        if (svc == null || l.isEmpty()) return;
+        startService(new Intent(this, PlayerService.class));
+        svc.setList(l, i);
+        if (l.get(i).video) startActivity(new Intent(this, VideoActivity.class));
+    }
+
+    private void shuffle(List<Track> l) {
+        if (svc == null || l.isEmpty()) return;
+        svc.shuffle = true;
+        svc.save();
+        play(l, new Random().nextInt(l.size()));
+    }
+
+    private void enqueue(List<Track> l) {
+        if (svc == null) return;
+        startService(new Intent(this, PlayerService.class));
+        for (Track t : l) svc.addToQueue(t);
+        Ui.toast(this, l.size() + " kayıt sıraya eklendi");
+    }
+
+    private void shuffleAll() {
+        List<Track> l = new ArrayList<>();
+        for (Row r : rows) if (r.type == Row.TRACK) l.add(r.t);
+        shuffle(l);
+        Ui.toast(this, "Karışık çalınıyor");
+    }
+
+    private void trackMenu(Track t, List<Track> list, int idx, String playlistName) {
+        List<String> labels = new ArrayList<>();
+        List<Integer> icons = new ArrayList<>();
+        labels.add("Çal"); icons.add(R.drawable.ic_play);
+        labels.add("Sonraki olarak çal"); icons.add(R.drawable.ic_queue_play);
+        labels.add("Sıraya ekle"); icons.add(R.drawable.ic_queue);
+        labels.add("Listeye ekle"); icons.add(R.drawable.ic_playlist_add);
+        if (t.video) { labels.add("Ses olarak oynat"); icons.add(R.drawable.ic_headset); }
+        labels.add("Bilgiler"); icons.add(R.drawable.ic_info);
+        labels.add("Paylaş"); icons.add(R.drawable.ic_share);
+        if (playlistName != null) { labels.add("Listeden kaldır"); icons.add(R.drawable.ic_delete); }
+        int[] ic = new int[icons.size()];
+        for (int i = 0; i < ic.length; i++) ic[i] = icons.get(i);
+        Ui.menu(listView, labels.toArray(new String[0]), ic, k -> {
+            String a = labels.get(k);
+            switch (a) {
+                case "Çal": play(list, idx); break;
+                case "Sonraki olarak çal":
+                    if (svc != null) { startService(new Intent(this, PlayerService.class)); svc.playNext(t); Ui.toast(this, "Sonraki olarak çalınacak"); }
+                    break;
+                case "Sıraya ekle": enqueue(Collections.singletonList(t)); break;
+                case "Listeye ekle": Ui.addToPlaylistDialog(this, Collections.singletonList(t)); break;
+                case "Ses olarak oynat":
+                    if (svc != null) {
+                        startService(new Intent(this, PlayerService.class));
+                        svc.setList(list, idx);
+                        startActivity(new Intent(this, AudioActivity.class));
+                    }
+                    break;
+                case "Bilgiler": Ui.infoDialog(this, t, svc); break;
+                case "Paylaş": Ui.shareFile(this, t); break;
+                case "Listeden kaldır":
+                    List<Track> l = Lib.playlist(this, playlistName);
+                    for (int i = 0; i < l.size(); i++) {
+                        if (l.get(i).uri.equals(t.uri)) { l.remove(i); break; }
+                    }
+                    Lib.savePlaylist(this, playlistName, l);
+                    render();
+                    break;
             }
-            PlayerService.Track t = vShown.get(i);
-            boolean cur = svc != null && svc.current() != null && svc.current().uri.equals(t.uri);
+        });
+    }
+
+    private void groupMenu(List<Track> items) {
+        Ui.menu(listView, new String[]{"Çal", "Karışık çal", "Sıraya ekle", "Listeye ekle"},
+                new int[]{R.drawable.ic_play, R.drawable.ic_shuffle, R.drawable.ic_queue, R.drawable.ic_playlist_add}, k -> {
+                    List<Track> l = sorted(items);
+                    if (k == 0) play(l, 0);
+                    else if (k == 1) shuffle(l);
+                    else if (k == 2) enqueue(l);
+                    else Ui.addToPlaylistDialog(this, l);
+                });
+    }
+
+    // ---------- liste görünümü ----------
+
+    private class RowAdapter extends BaseAdapter {
+        @Override public int getCount() { return rows.size(); }
+        @Override public Object getItem(int i) { return rows.get(i); }
+        @Override public long getItemId(int i) { return i; }
+        @Override public int getViewTypeCount() { return 4; }
+        @Override public int getItemViewType(int i) {
+            Row r = rows.get(i);
+            if (r.type == Row.HEADER) return 0;
+            if (r.type == Row.TRACK && r.t.video) return 1;
+            if (r.type == Row.TRACK) return 2;
+            return 3;
+        }
+        @Override public boolean isEnabled(int i) { return rows.get(i).type != Row.HEADER; }
+
+        @Override public View getView(int i, View cv, ViewGroup parent) {
+            Row r = rows.get(i);
+            int vt = getItemViewType(i);
+            if (vt == 0) {
+                TextView t = cv instanceof TextView ? (TextView) cv : Ui.text(MainActivity.this, "", 22, ORANGE, true);
+                t.setPadding(dp(28), dp(14), dp(16), dp(4));
+                t.setText(r.title);
+                return t;
+            }
+            LinearLayout row = (LinearLayout) cv;
+            if (row == null) row = makeRow(vt);
             ImageView iv = (ImageView) row.getChildAt(0);
             LinearLayout col = (LinearLayout) row.getChildAt(1);
             TextView a = (TextView) col.getChildAt(0);
-            a.setText(t.title);
-            a.setTextColor(cur ? ACC2 : TXT);
-            ((TextView) col.getChildAt(1)).setText(t.dur > 0 ? time(t.dur) + " · " + t.artist : t.artist);
-            loadThumb(iv, t);
+            TextView b = (TextView) col.getChildAt(1);
+            ImageView more = (ImageView) row.getChildAt(2);
+            a.setText(r.title);
+            b.setText(r.sub);
+            b.setVisibility(r.sub.isEmpty() ? View.GONE : View.VISIBLE);
+            boolean cur = r.type == Row.TRACK && svc != null && svc.current() != null
+                    && svc.current().uri.equals(r.t.uri);
+            a.setTextColor(cur ? ORANGE : TXT);
+            if (vt == 1) {
+                Ui.thumb(iv, r.t);
+            } else if (vt == 2) {
+                iv.setImageDrawable(Ui.icon(MainActivity.this, cur ? R.drawable.ic_bars : R.drawable.ic_note,
+                        cur ? TXT : 0xFF8A8A8A));
+            } else {
+                iv.setImageDrawable(Ui.icon(MainActivity.this, r.icon == 0 ? R.drawable.ic_folder : r.icon,
+                        r.type == Row.ACTION ? ORANGE : 0xFF8A8A8A));
+            }
+            more.setVisibility(r.more != null ? View.VISIBLE : View.INVISIBLE);
+            final Runnable m = r.more;
+            more.setOnClickListener(v -> { if (m != null) m.run(); });
             return row;
         }
-    }
 
-    private void loadThumb(final ImageView iv, final PlayerService.Track t) {
-        final String key = t.uri.toString();
-        iv.setTag(key);
-        Bitmap b = thumbs.get(key);
-        iv.setImageBitmap(b);
-        if (b != null) return;
-        pool.submit(new Runnable() {
-            @Override public void run() {
-                Bitmap bm = null;
-                try {
-                    if (Build.VERSION.SDK_INT >= 29) {
-                        bm = getContentResolver().loadThumbnail(t.uri, new Size(320, 180), null);
-                    } else if (t.id > 0) {
-                        bm = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), t.id,
-                                MediaStore.Video.Thumbnails.MINI_KIND, null);
-                    }
-                } catch (Throwable ignored) {}
-                if (bm == null) return;
-                final Bitmap fb = bm;
-                h.post(new Runnable() {
-                    @Override public void run() {
-                        thumbs.put(key, fb);
-                        if (key.equals(iv.getTag())) iv.setImageBitmap(fb);
-                    }
-                });
+        private LinearLayout makeRow(int vt) {
+            Context c = MainActivity.this;
+            LinearLayout row = new LinearLayout(c);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(dp(vt == 1 ? 16 : 20), dp(10), dp(4), dp(10));
+            row.setMinimumHeight(dp(76));
+            ImageView iv = new ImageView(c);
+            if (vt == 1) {
+                iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                iv.setBackground(Ui.round(0xFF2A2A2A, dp(6)));
+                iv.setClipToOutline(true);
+                row.addView(iv, new LinearLayout.LayoutParams(dp(120), dp(68)));
+            } else {
+                iv.setPadding(dp(4), dp(4), dp(4), dp(4));
+                row.addView(iv, new LinearLayout.LayoutParams(dp(52), dp(52)));
             }
-        });
-    }
-
-    private class SongAdapter extends BaseAdapter {
-        @Override public int getCount() { return shown.size(); }
-        @Override public Object getItem(int i) { return shown.get(i); }
-        @Override public long getItemId(int i) { return i; }
-        @Override public View getView(int i, View cv, ViewGroup parent) {
-            LinearLayout row = (LinearLayout) cv;
-            if (row == null) {
-                row = new LinearLayout(MainActivity.this);
-                row.setOrientation(LinearLayout.VERTICAL);
-                row.setPadding(dp(20), dp(10), dp(20), dp(10));
-                TextView a = text("", 15, TXT, false);
-                a.setSingleLine(true);
-                a.setEllipsize(TextUtils.TruncateAt.END);
-                TextView b = text("", 12, SUB, false);
-                b.setSingleLine(true);
-                b.setEllipsize(TextUtils.TruncateAt.END);
-                row.addView(a);
-                row.addView(b);
-            }
-            PlayerService.Track t = shown.get(i);
-            boolean cur = svc != null && svc.current() != null && svc.current().uri.equals(t.uri);
-            TextView a = (TextView) row.getChildAt(0);
-            a.setText(t.title);
-            a.setTextColor(cur ? ACC2 : TXT);
-            a.setTypeface(cur ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
-            ((TextView) row.getChildAt(1)).setText(t.dur > 0 ? t.artist + " · " + time(t.dur) : t.artist);
+            LinearLayout col = new LinearLayout(c);
+            col.setOrientation(LinearLayout.VERTICAL);
+            col.setPadding(dp(vt == 1 ? 14 : 22), 0, dp(8), 0);
+            TextView a = Ui.text(c, "", 18, TXT, false);
+            a.setMaxLines(vt == 1 ? 2 : 1);
+            a.setEllipsize(TextUtils.TruncateAt.END);
+            TextView b = Ui.text(c, "", 15, SUB, false);
+            b.setSingleLine(true);
+            b.setEllipsize(TextUtils.TruncateAt.END);
+            b.setPadding(0, dp(3), 0, 0);
+            col.addView(a);
+            col.addView(b);
+            row.addView(col, new LinearLayout.LayoutParams(0, WC, 1));
+            ImageView more = Ui.img(c, R.drawable.ic_more_vert, TXT, 26, 12);
+            Ui.ripple(more, true);
+            row.addView(more);
             return row;
         }
-    }
-
-    private View buildPlayerBar() {
-        LinearLayout bar = new LinearLayout(this);
-        bar.setOrientation(LinearLayout.VERTICAL);
-        GradientDrawable g = new GradientDrawable();
-        g.setColor(CARD);
-        g.setCornerRadii(new float[]{dp(20), dp(20), dp(20), dp(20), 0, 0, 0, 0});
-        bar.setBackground(g);
-        bar.setPadding(dp(16), dp(12), dp(16), dp(10));
-
-        npTitle = text("Şarkı seçin", 15, TXT, true);
-        npTitle.setSingleLine(true);
-        npTitle.setEllipsize(TextUtils.TruncateAt.END);
-        npArtist = text("", 12, SUB, false);
-        npArtist.setSingleLine(true);
-        View.OnClickListener openVideo = new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (svc != null && svc.current() != null && svc.current().video)
-                    startActivity(new Intent(MainActivity.this, VideoActivity.class));
-            }
-        };
-        npTitle.setOnClickListener(openVideo);
-        npArtist.setOnClickListener(openVideo);
-        bar.addView(npTitle);
-        bar.addView(npArtist);
-
-        seek = new SeekBar(this);
-        tint(seek);
-        seek.setPadding(dp(8), dp(10), dp(8), dp(4));
-        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar s, int p, boolean user) {
-                if (user) tCur.setText(time(p));
-            }
-            @Override public void onStartTrackingTouch(SeekBar s) { dragging = true; }
-            @Override public void onStopTrackingTouch(SeekBar s) {
-                dragging = false;
-                if (svc != null) svc.seek(s.getProgress());
-            }
-        });
-        bar.addView(seek);
-
-        LinearLayout times = new LinearLayout(this);
-        tCur = text("0:00", 11, SUB, false);
-        tDur = text("0:00", 11, SUB, false);
-        tDur.setGravity(Gravity.END);
-        times.addView(tCur, lp(0, WC, 1));
-        times.addView(tDur, lp(0, WC, 1));
-        bar.addView(times);
-
-        LinearLayout row = new LinearLayout(this);
-        row.setGravity(Gravity.CENTER);
-        bShuffle = ctl("🔀", 18);
-        TextView bPrev = ctl("⏮", 24);
-        bPlay = ctl("▶", 30);
-        TextView bNext = ctl("⏭", 24);
-        bRepeat = ctl("🔁", 18);
-        row.addView(bShuffle, lp(0, WC, 1));
-        row.addView(bPrev, lp(0, WC, 1));
-        row.addView(bPlay, lp(0, WC, 1));
-        row.addView(bNext, lp(0, WC, 1));
-        row.addView(bRepeat, lp(0, WC, 1));
-        bar.addView(row);
-
-        bShuffle.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (svc == null) return;
-                svc.shuffle = !svc.shuffle;
-                svc.save();
-                toast(svc.shuffle ? "Karışık çalma açık" : "Karışık çalma kapalı");
-                refresh();
-            }
-        });
-        bRepeat.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (svc == null) return;
-                svc.repeat = (svc.repeat + 1) % 3;
-                svc.save();
-                toast(svc.repeat == 0 ? "Tekrar kapalı" : svc.repeat == 1 ? "Tüm listeyi tekrarla" : "Bu şarkıyı tekrarla");
-                refresh();
-            }
-        });
-        bPrev.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { if (svc != null) svc.prev(); }
-        });
-        bNext.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { if (svc != null) svc.next(false); }
-        });
-        bPlay.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                if (svc == null) return;
-                startService(new Intent(MainActivity.this, PlayerService.class));
-                if (svc.current() == null && !shown.isEmpty()) svc.setList(shown, 0);
-                else svc.toggle();
-            }
-        });
-        return bar;
-    }
-
-    private TextView ctl(String s, float sp) {
-        TextView t = text(s, sp, TXT, false);
-        t.setGravity(Gravity.CENTER);
-        t.setPadding(0, dp(6), 0, dp(6));
-        return t;
-    }
-
-    private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_SHORT).show(); }
-
-    private Uri lastUri;
-
-    private void refresh() {
-        if (svc == null || npTitle == null) return;
-        PlayerService.Track t = svc.current();
-        npTitle.setText(t == null ? "Şarkı seçin" : t.title);
-        npArtist.setText(t == null ? "" : t.video ? "▶ Videoyu açmak için dokunun" : t.artist);
-        bPlay.setText(svc.isPlaying() ? "⏸" : "▶");
-        bShuffle.setAlpha(svc.shuffle ? 1f : 0.35f);
-        bRepeat.setAlpha(svc.repeat == 0 ? 0.35f : 1f);
-        bRepeat.setText(svc.repeat == 2 ? "🔂" : "🔁");
-        int d = svc.duration();
-        if (!dragging) {
-            seek.setMax(Math.max(d, 1));
-            seek.setProgress(svc.position());
-            tCur.setText(time(svc.position()));
-        }
-        tDur.setText(time(d));
-        Uri u = t == null ? null : t.uri;
-        if ((u == null ? lastUri != null : !u.equals(lastUri)) && adapter != null) {
-            lastUri = u;
-            adapter.notifyDataSetChanged();
-            if (vAdapter != null) vAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private static String time(long ms) {
-        long s = ms / 1000;
-        if (s >= 3600) return String.format(Locale.US, "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60);
-        return String.format(Locale.US, "%d:%02d", s / 60, s % 60);
-    }
-
-    private void tint(SeekBar s) {
-        s.setProgressTintList(ColorStateList.valueOf(ACC));
-        s.setThumbTintList(ColorStateList.valueOf(ACC2));
-        s.setProgressBackgroundTintList(ColorStateList.valueOf(0xFF4A4F63));
-    }
-
-    private LinearLayout page(ScrollView sv) {
-        LinearLayout p = new LinearLayout(this);
-        p.setOrientation(LinearLayout.VERTICAL);
-        p.setPadding(dp(12), 0, dp(12), dp(16));
-        sv.addView(p);
-        return p;
-    }
-
-    private LinearLayout card(LinearLayout parent, String title, String sub) {
-        LinearLayout c = new LinearLayout(this);
-        c.setOrientation(LinearLayout.VERTICAL);
-        c.setBackground(round(CARD, 16));
-        c.setPadding(dp(16), dp(14), dp(16), dp(12));
-        LinearLayout.LayoutParams p = lp(MP, WC, 0);
-        p.setMargins(dp(4), dp(4), dp(4), dp(8));
-        parent.addView(c, p);
-        if (title != null) c.addView(text(title, 16, TXT, true));
-        if (sub != null) {
-            TextView s = text(sub, 12, SUB, false);
-            s.setPadding(0, dp(2), 0, dp(4));
-            c.addView(s);
-        }
-        return c;
-    }
-
-    private SeekBar slider(LinearLayout parent, String name, final int min, int max, int val,
-                           final Fmt fmt, final IntCb cb) {
-        LinearLayout head = new LinearLayout(this);
-        head.setPadding(0, dp(8), 0, 0);
-        head.addView(text(name, 13, TXT, false), lp(0, WC, 1));
-        final TextView v = text(fmt.f(val), 13, ACC2, true);
-        head.addView(v);
-        parent.addView(head);
-        SeekBar s = new SeekBar(this);
-        tint(s);
-        s.setPadding(dp(8), dp(8), dp(8), dp(8));
-        s.setMax(max - min);
-        s.setProgress(val - min);
-        s.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar sb, int p, boolean user) {
-                v.setText(fmt.f(p + min));
-                if (user) cb.on(p + min);
-            }
-            @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) { if (svc != null) svc.save(); }
-        });
-        parent.addView(s);
-        return s;
-    }
-
-    private void chips(LinearLayout parent, String[] names, int selected, final IntCb cb) {
-        HorizontalScrollView hs = new HorizontalScrollView(this);
-        hs.setHorizontalScrollBarEnabled(false);
-        final LinearLayout row = new LinearLayout(this);
-        row.setPadding(0, dp(8), 0, dp(4));
-        hs.addView(row);
-        for (int i = 0; i < names.length; i++) {
-            final int k = i;
-            TextView t = text(names[i], 13, TXT, false);
-            t.setPadding(dp(14), dp(8), dp(14), dp(8));
-            t.setBackground(round(i == selected ? ACC : 0xFF2A2D3A, 20));
-            LinearLayout.LayoutParams p = lp(WC, WC, 0);
-            p.rightMargin = dp(8);
-            row.addView(t, p);
-            t.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                    for (int j = 0; j < row.getChildCount(); j++) {
-                        row.getChildAt(j).setBackground(round(j == k ? ACC : 0xFF2A2D3A, 20));
-                    }
-                    cb.on(k);
-                }
-            });
-        }
-        parent.addView(hs);
-    }
-
-    private final Fmt pct = new Fmt() { @Override public String f(int v) { return "%" + v; } };
-
-    // ---------- ekolayzır sekmesi ----------
-
-    private static final String[] PRESET_NAMES = {"Düz", "Güçlü bas", "Güçlü tiz", "Kulaklık", "Rock", "Pop",
-            "Vokal", "Dans", "Klasik"};
-    private static final int[][] PRESETS = {
-            {0, 0, 0, 0, 0}, {7, 4, 0, 0, 0}, {0, 0, 0, 4, 7}, {5, 2, 0, 2, 4}, {5, 3, -1, 3, 5},
-            {-1, 2, 4, 2, -1}, {-2, 0, 4, 3, 0}, {6, 3, 0, 2, 4}, {4, 2, 0, 2, 4}};
-
-    private View buildEq() {
-        ScrollView sv = new ScrollView(this);
-        LinearLayout p = page(sv);
-
-        LinearLayout c1 = card(p, "Bas ve Tiz", "Hızlı ayar: bası ve tizi tek kaydırıcıyla güçlendirin.");
-        slider(c1, "Bas", 0, 100, svc.bass, pct, new IntCb() {
-            @Override public void on(int v) { svc.bass = v; svc.applyEq(); }
-        });
-        slider(c1, "Tiz (treble)", 0, 100, svc.treble, pct, new IntCb() {
-            @Override public void on(int v) { svc.treble = v; svc.applyEq(); }
-        });
-
-        if (svc.hasEq()) {
-            LinearLayout c2 = card(p, "Ekolayzır", "Hazır ayar seçin veya bantları tek tek ayarlayın.");
-            chips(c2, PRESET_NAMES, -1, new IntCb() {
-                @Override public void on(int k) {
-                    svc.usePreset(PRESETS[k]);
-                    showTab(2);
-                }
-            });
-            final int min = svc.bandMin(), max = svc.bandMax();
-            for (int i = 0; i < svc.bands.length; i++) {
-                final int k = i;
-                int f = svc.bandFreq(i);
-                String name = f >= 1000 ? String.format(Locale.US, "%.1f kHz", f / 1000f) : f + " Hz";
-                slider(c2, name, min, max, Math.max(min, Math.min(max, svc.bands[i])), new Fmt() {
-                    @Override public String f(int v) {
-                        return (v > 0 ? "+" : "") + String.format(Locale.US, "%.1f dB", v / 100f);
-                    }
-                }, new IntCb() {
-                    @Override public void on(int v) { svc.bands[k] = v; svc.applyEq(); }
-                });
-            }
-        } else {
-            card(p, "Ekolayzır", "Bu telefon ekolayzırı desteklemiyor.");
-        }
-        return sv;
-    }
-
-    // ---------- efektler sekmesi ----------
-
-    private View buildFx() {
-        ScrollView sv = new ScrollView(this);
-        LinearLayout p = page(sv);
-
-        LinearLayout c8 = card(p, "8D Ses", "Ses kulaklıkta başınızın etrafında döner. Kulaklıkla dinleyin.");
-        Switch sw = new Switch(this);
-        sw.setText("8D açık");
-        sw.setTextColor(TXT);
-        sw.setTextSize(14);
-        sw.setChecked(svc.d8);
-        sw.setPadding(0, dp(6), 0, 0);
-        sw.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
-            @Override public void onCheckedChanged(android.widget.CompoundButton b, boolean on) {
-                svc.set8d(on);
-                if (on && svc.reverb == 0 && svc.hasReverb()) {
-                    svc.reverb = 5;
-                    svc.applyReverb();
-                }
-                if (on && svc.surround == 0 && svc.hasSurround()) {
-                    svc.surround = 60;
-                    svc.applySurround();
-                }
-                svc.save();
-                showTab(3);
-            }
-        });
-        c8.addView(sw);
-        slider(c8, "Dönüş süresi", 3, 20, svc.period, new Fmt() {
-            @Override public String f(int v) { return v + " sn"; }
-        }, new IntCb() {
-            @Override public void on(int v) { svc.period = v; }
-        });
-
-        LinearLayout cb = card(p, "Ses yükseltme", "Telefonun en yüksek sesinin üstüne çıkar. Yüksek ayarda ses bozulabilir; uzun süre çok yüksek sesle dinlemek kulağa zarar verir.");
-        if (svc.hasBoost()) {
-            slider(cb, "Güçlendirme", 0, 100, svc.boost, new Fmt() {
-                @Override public String f(int v) {
-                    return String.format(Locale.US, "+%.1f dB", v * 0.15f);
-                }
-            }, new IntCb() {
-                @Override public void on(int v) { svc.boost = v; svc.applyBoost(); }
-            });
-        } else {
-            cb.addView(text("Bu telefon ses yükseltmeyi desteklemiyor.", 13, SUB, false));
-        }
-
-        LinearLayout cs = card(p, "Surround ve Yankı", null);
-        if (svc.hasSurround()) {
-            slider(cs, "Surround (3D genişlik)", 0, 100, svc.surround, pct, new IntCb() {
-                @Override public void on(int v) { svc.surround = v; svc.applySurround(); }
-            });
-        }
-        if (svc.hasReverb()) {
-            TextView rl = text("Yankı", 13, TXT, false);
-            rl.setPadding(0, dp(8), 0, 0);
-            cs.addView(rl);
-            chips(cs, new String[]{"Kapalı", "Küçük oda", "Orta oda", "Büyük oda", "Salon", "Büyük salon", "Metalik"},
-                    svc.reverb, new IntCb() {
-                        @Override public void on(int k) { svc.reverb = k; svc.applyReverb(); svc.save(); }
-                    });
-        }
-        if (!svc.d8) {
-            slider(cs, "Sol / Sağ dengesi", -100, 100, svc.balance, new Fmt() {
-                @Override public String f(int v) {
-                    return v == 0 ? "Orta" : v < 0 ? "Sol %" + (-v) : "Sağ %" + v;
-                }
-            }, new IntCb() {
-                @Override public void on(int v) { svc.balance = v; svc.applyVolume(); }
-            });
-        }
-
-        LinearLayout ch = card(p, "Hız ve Perde", "Yavaşlatılmış (slowed) veya hızlandırılmış (nightcore) dinleme.");
-        Fmt x = new Fmt() {
-            @Override public String f(int v) { return String.format(Locale.US, "%.2fx", v / 100f); }
-        };
-        slider(ch, "Hız", 50, 200, svc.speed, x, new IntCb() {
-            @Override public void on(int v) { svc.speed = v; svc.applySpeed(); }
-        });
-        slider(ch, "Perde (ses inceliği)", 50, 150, svc.pitch, x, new IntCb() {
-            @Override public void on(int v) { svc.pitch = v; svc.applySpeed(); }
-        });
-
-        long left = svc.sleepAt - System.currentTimeMillis();
-        LinearLayout ct = card(p, "Uyku zamanlayıcı", svc.sleepAt > 0 && left > 0
-                ? "Müzik yaklaşık " + (left / 60000 + 1) + " dk sonra duracak."
-                : "Seçilen süre sonunda müzik kendiliğinden durur.");
-        final int[] mins = {0, 15, 30, 45, 60, 90};
-        chips(ct, new String[]{"Kapalı", "15 dk", "30 dk", "45 dk", "60 dk", "90 dk"},
-                svc.sleepAt > 0 ? -1 : 0, new IntCb() {
-                    @Override public void on(int k) {
-                        svc.setSleep(mins[k]);
-                        toast(mins[k] == 0 ? "Zamanlayıcı kapatıldı" : mins[k] + " dk sonra duracak");
-                    }
-                });
-
-        TextView reset = text("Tüm ayarları sıfırla", 14, TXT, true);
-        reset.setGravity(Gravity.CENTER);
-        reset.setBackground(round(0xFF2A2D3A, 14));
-        reset.setPadding(0, dp(12), 0, dp(12));
-        LinearLayout.LayoutParams rp = lp(MP, WC, 0);
-        rp.setMargins(dp(4), dp(4), dp(4), dp(8));
-        p.addView(reset, rp);
-        reset.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                svc.bass = 0; svc.treble = 0; svc.boost = 0; svc.surround = 0; svc.reverb = 0;
-                svc.balance = 0; svc.speed = 100; svc.pitch = 100; svc.period = 8; svc.d8 = false;
-                for (int i = 0; i < svc.bands.length; i++) svc.bands[i] = 0;
-                svc.applyAll();
-                svc.save();
-                toast("Ayarlar sıfırlandı");
-                showTab(3);
-            }
-        });
-        return sv;
     }
 }

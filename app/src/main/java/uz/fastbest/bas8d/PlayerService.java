@@ -39,10 +39,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public static class Track {
         public Uri uri;
-        public String title = "";
-        public String artist = "";
-        public long dur;
-        public long id;
+        public String title = "", artist = "", album = "", folder = "", path = "", mime = "";
+        public long dur, id, size, date;
+        public int w, h;
         public boolean video;
     }
 
@@ -57,17 +56,14 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public List<Track> list = new ArrayList<>();
     public int index = -1;
     public final List<Runnable> listeners = new ArrayList<>();
-    private SurfaceHolder holder;
-    public int vw, vh;
 
     private MediaPlayer mp;
-    private boolean prepared;
-    private boolean foreground;
-    private boolean focusPaused;
-    private int errors;
-    private int sid;
+    private boolean prepared, foreground, focusPaused;
+    private int errors, sid;
     private AudioManager am;
     private SharedPreferences sp;
+    private SurfaceHolder holder;
+    public int vw, vh;
 
     private Equalizer eq;
     private BassBoost bb;
@@ -80,6 +76,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public boolean d8, shuffle;
     public int[] bands = new int[0];
     public long sleepAt;
+    public boolean stopAtEnd;
+    public int abA = -1, abB = -1;
 
     private double phase;
     private float pan;
@@ -97,15 +95,20 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         }
     };
 
-    private final Runnable sleepRun = new Runnable() {
+    private final Runnable abRun = new Runnable() {
         @Override public void run() {
-            sleepAt = 0;
-            pause();
+            if (abA < 0 || abB < 0) return;
+            if (isPlaying() && position() >= abB) seek(abA);
+            h.postDelayed(this, 120);
         }
     };
 
+    private final Runnable sleepRun = () -> { sleepAt = 0; pause(); };
+
     private final BroadcastReceiver noisy = new BroadcastReceiver() {
-        @Override public void onReceive(Context c, Intent i) { pause(); }
+        @Override public void onReceive(Context c, Intent i) {
+            if (sp.getBoolean("unplug", true)) pause();
+        }
     };
 
     @Override public IBinder onBind(Intent intent) { return binder; }
@@ -132,9 +135,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mp.setOnPreparedListener(this);
         mp.setOnCompletionListener(this);
         mp.setOnErrorListener(this);
-        mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-            @Override public void onVideoSizeChanged(MediaPlayer m, int w, int hh) { vw = w; vh = hh; changed(); }
-        });
+        mp.setOnVideoSizeChangedListener((m, w, hh) -> { vw = w; vh = hh; changed(); });
         try { mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK); } catch (Exception ignored) {}
 
         try { eq = new Equalizer(0, sid); eq.setEnabled(true); } catch (Throwable t) { eq = null; }
@@ -146,7 +147,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         int n = bandCount();
         bands = new int[n];
         for (int i = 0; i < n; i++) bands[i] = sp.getInt("band" + i, 0);
-
         applyAll();
 
         IntentFilter f = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
@@ -154,10 +154,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         else registerReceiver(noisy, f);
 
         if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel ch = new NotificationChannel("calma", "Müzik çalma", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel ch = new NotificationChannel("calma", "Oynatma", NotificationManager.IMPORTANCE_LOW);
             ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(ch);
         }
-        if (d8) h.post(spin);
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
@@ -170,6 +169,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     @Override public void onDestroy() {
+        savePos();
         h.removeCallbacksAndMessages(null);
         try { unregisterReceiver(noisy); } catch (Exception ignored) {}
         try { am.abandonAudioFocus(this); } catch (Exception ignored) {}
@@ -183,30 +183,77 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         try { if (e != null) e.release(); } catch (Exception ignored) {}
     }
 
-    // ---------- çalma ----------
+    // ---------- liste ----------
 
     public void setList(List<Track> l, int start) {
+        savePos();
         list = new ArrayList<>(l);
         errors = 0;
         playIndex(start);
     }
 
+    public void addToQueue(Track t) {
+        list.add(t);
+        if (index < 0) playIndex(list.size() - 1);
+        else changed();
+    }
+
+    public void playNext(Track t) {
+        if (index < 0) { list.add(t); playIndex(list.size() - 1); return; }
+        list.add(index + 1, t);
+        changed();
+    }
+
+    public void removeAt(int i) {
+        if (i < 0 || i >= list.size()) return;
+        if (i == index) {
+            list.remove(i);
+            if (list.isEmpty()) {
+                index = -1;
+                try { mp.reset(); } catch (Exception ignored) {}
+                prepared = false;
+                changed();
+            } else playIndex(Math.min(i, list.size() - 1));
+            return;
+        }
+        list.remove(i);
+        if (i < index) index--;
+        changed();
+    }
+
+    public void move(int i, int to) {
+        if (i < 0 || i >= list.size() || to < 0 || to >= list.size()) return;
+        Track t = list.remove(i);
+        list.add(to, t);
+        if (index == i) index = to;
+        else if (i < index && to >= index) index--;
+        else if (i > index && to <= index) index++;
+        changed();
+    }
+
+    // ---------- çalma ----------
+
     public void playIndex(int i) {
         if (list.isEmpty()) return;
         if (i < 0) i = list.size() - 1;
         if (i >= list.size()) i = 0;
+        if (prepared && i != index) savePos();
         index = i;
         prepared = false;
+        abA = -1; abB = -1;
+        h.removeCallbacks(abRun);
+        Track t = list.get(i);
         try {
             mp.reset();
             mp.setAudioSessionId(sid);
             mp.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(list.get(i).video ? AudioAttributes.CONTENT_TYPE_MOVIE : AudioAttributes.CONTENT_TYPE_MUSIC).build());
-            vw = 0; vh = 0;
+                    .setContentType(t.video ? AudioAttributes.CONTENT_TYPE_MOVIE : AudioAttributes.CONTENT_TYPE_MUSIC).build());
+            vw = t.w; vh = t.h;
             if (holder != null) mp.setDisplay(holder);
-            mp.setDataSource(this, list.get(i).uri);
+            mp.setDataSource(this, t.uri);
             mp.prepareAsync();
+            Lib.addHistory(this, t);
         } catch (Exception e) {
             skipBroken();
         }
@@ -215,19 +262,29 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     private void skipBroken() {
         errors++;
-        if (errors < list.size() && errors < 20) {
-            h.post(new Runnable() { @Override public void run() { next(false); } });
-        }
+        if (errors < list.size() && errors < 20) h.post(() -> next(false));
     }
 
     @Override public void onPrepared(MediaPlayer m) {
         prepared = true;
         errors = 0;
+        Track t = current();
+        if (t != null && t.video && sp.getBoolean("resume", true)) {
+            int p = sp.getInt("pos:" + t.uri, 0);
+            if (p > 5000 && p < duration() - 5000) seek(p);
+        }
         startPlay();
     }
 
     @Override public void onCompletion(MediaPlayer m) {
         if (!prepared) return;
+        Track t = current();
+        if (t != null) sp.edit().remove("pos:" + t.uri).apply();
+        if (stopAtEnd) {
+            stopAtEnd = false;
+            changed();
+            return;
+        }
         next(true);
     }
 
@@ -252,6 +309,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public void pause() {
         try { if (prepared && mp.isPlaying()) mp.pause(); } catch (Exception ignored) {}
+        savePos();
         changed();
     }
 
@@ -311,12 +369,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     public void seek(int ms) {
-        try { if (prepared) mp.seekTo(ms); } catch (Exception ignored) {}
-    }
-
-    public void setDisplay(SurfaceHolder sh) {
-        holder = sh;
-        try { mp.setDisplay(sh); } catch (Exception ignored) {}
+        try { if (prepared) mp.seekTo(Math.max(0, ms)); } catch (Exception ignored) {}
     }
 
     public void seekBy(int ms) {
@@ -326,6 +379,35 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public Track current() {
         return index >= 0 && index < list.size() ? list.get(index) : null;
+    }
+
+    public void setDisplay(SurfaceHolder sh) {
+        holder = sh;
+        try { mp.setDisplay(sh); } catch (Exception ignored) {}
+    }
+
+    private void savePos() {
+        Track t = current();
+        if (t == null || !t.video || !prepared) return;
+        int p = position();
+        if (p > 5000 && p < duration() - 5000) sp.edit().putInt("pos:" + t.uri, p).apply();
+    }
+
+    /** A-B: 1. çağrı A, 2. çağrı B, 3. çağrı iptal. Döner: 1=A, 2=B, 0=iptal. */
+    public int abStep() {
+        if (abA < 0) { abA = position(); changed(); return 1; }
+        if (abB < 0 && position() > abA + 500) {
+            abB = position();
+            h.removeCallbacks(abRun);
+            h.post(abRun);
+            seek(abA);
+            changed();
+            return 2;
+        }
+        abA = -1; abB = -1;
+        h.removeCallbacks(abRun);
+        changed();
+        return 0;
     }
 
     @Override public void onAudioFocusChange(int f) {
@@ -478,9 +560,18 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public void setSleep(int minutes) {
         h.removeCallbacks(sleepRun);
-        if (minutes <= 0) { sleepAt = 0; return; }
+        stopAtEnd = false;
+        if (minutes <= 0) { sleepAt = 0; changed(); return; }
         sleepAt = System.currentTimeMillis() + minutes * 60000L;
         h.postDelayed(sleepRun, minutes * 60000L);
+        changed();
+    }
+
+    public void setStopAtEnd() {
+        h.removeCallbacks(sleepRun);
+        sleepAt = 0;
+        stopAtEnd = true;
+        changed();
     }
 
     // ---------- bildirim ----------
@@ -504,11 +595,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         Track t = current();
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, "calma") : new Notification.Builder(this);
+        Class<?> target = t != null && t.video ? VideoActivity.class : AudioActivity.class;
         PendingIntent open = PendingIntent.getActivity(this, 0,
-                new Intent(this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(this, target), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         boolean playing = isPlaying();
-        b.setSmallIcon(android.R.drawable.ic_media_play)
-                .setContentTitle(t == null ? "Bas8D Müzik" : t.title)
+        b.setSmallIcon(R.drawable.ic_note)
+                .setContentTitle(t == null ? "Bas8D" : t.title)
                 .setContentText(t == null ? "" : t.artist)
                 .setContentIntent(open)
                 .setOnlyAlertOnce(true)
