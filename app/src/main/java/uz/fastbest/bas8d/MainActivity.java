@@ -11,7 +11,13 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.util.LruCache;
+import android.util.Size;
+import android.widget.ImageView;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -73,16 +79,26 @@ public class MainActivity extends Activity {
     private final ServiceConnection conn = new ServiceConnection() {
         @Override public void onServiceConnected(ComponentName n, IBinder b) {
             svc = ((PlayerService.LocalBinder) b).get();
-            svc.onChange = new Runnable() { @Override public void run() { refresh(); } };
-            if (all.isEmpty() && !svc.list.isEmpty()) {
-                all.addAll(svc.list);
-                applyFilter();
-            }
+            svc.listeners.add(uiListener);
             showTab(tab);
             refresh();
         }
         @Override public void onServiceDisconnected(ComponentName n) { svc = null; }
     };
+
+    private final Runnable uiListener = new Runnable() {
+        @Override public void run() { h.post(new Runnable() { @Override public void run() { refresh(); } }); }
+    };
+
+    // videolar
+    private final List<PlayerService.Track> vAll = new ArrayList<>();
+    private final List<PlayerService.Track> vShown = new ArrayList<>();
+    private String vFilter = "";
+    private View videosView;
+    private TextView vEmpty;
+    private VideoAdapter vAdapter;
+    private final LruCache<String, Bitmap> thumbs = new LruCache<>(80);
+    private final ExecutorService pool = Executors.newFixedThreadPool(2);
 
     private final Runnable tick = new Runnable() {
         @Override public void run() {
@@ -101,6 +117,13 @@ public class MainActivity extends Activity {
         startService(i);
         bindService(i, conn, Context.BIND_AUTO_CREATE);
         askPermission();
+        tab = getIntent().getIntExtra("tab", 0);
+        showTab(tab);
+    }
+
+    @Override protected void onNewIntent(Intent in) {
+        super.onNewIntent(in);
+        if (in != null && in.hasExtra("tab")) showTab(in.getIntExtra("tab", 0));
     }
 
     @Override protected void onResume() {
@@ -116,7 +139,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onDestroy() {
         if (svc != null) {
-            svc.onChange = null;
+            svc.listeners.remove(uiListener);
             boolean idle = !svc.isPlaying();
             try { unbindService(conn); } catch (Exception ignored) {}
             if (idle) stopService(new Intent(this, PlayerService.class));
@@ -131,21 +154,33 @@ public class MainActivity extends Activity {
                 : Manifest.permission.READ_EXTERNAL_STORAGE;
     }
 
+    private String videoPerm() {
+        return Build.VERSION.SDK_INT >= 33 ? Manifest.permission.READ_MEDIA_VIDEO
+                : Manifest.permission.READ_EXTERNAL_STORAGE;
+    }
+
+    private boolean granted(String p) {
+        return checkSelfPermission(p) == PackageManager.PERMISSION_GRANTED;
+    }
+
     private void askPermission() {
-        if (checkSelfPermission(audioPerm()) == PackageManager.PERMISSION_GRANTED) {
+        if (granted(audioPerm()) && granted(videoPerm())) {
             loadSongs();
+            loadVideos();
             return;
         }
         if (Build.VERSION.SDK_INT >= 33) {
-            requestPermissions(new String[]{audioPerm(), Manifest.permission.POST_NOTIFICATIONS}, 1);
+            requestPermissions(new String[]{audioPerm(), videoPerm(), Manifest.permission.POST_NOTIFICATIONS}, 1);
         } else {
             requestPermissions(new String[]{audioPerm()}, 1);
         }
     }
 
     @Override public void onRequestPermissionsResult(int code, String[] p, int[] r) {
-        if (checkSelfPermission(audioPerm()) == PackageManager.PERMISSION_GRANTED) loadSongs();
+        if (granted(audioPerm())) loadSongs();
         else applyFilter();
+        if (granted(videoPerm())) loadVideos();
+        else applyVideoFilter();
     }
 
     private void loadSongs() {
@@ -210,7 +245,8 @@ public class MainActivity extends Activity {
     private void openFiles() {
         Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         i.addCategory(Intent.CATEGORY_OPENABLE);
-        i.setType("audio/*");
+        i.setType("*/*");
+        i.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"audio/*", "video/*"});
         i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         try { startActivityForResult(i, 2); }
         catch (Exception e) { Toast.makeText(this, "Dosya seçici açılamadı", Toast.LENGTH_SHORT).show(); }
@@ -225,6 +261,7 @@ public class MainActivity extends Activity {
         else if (data.getData() != null) uris.add(data.getData());
         if (uris.isEmpty()) return;
         List<PlayerService.Track> picked = new ArrayList<>();
+        List<PlayerService.Track> vPicked = new ArrayList<>();
         for (Uri u : uris) {
             try {
                 getContentResolver().takePersistableUriPermission(u, Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -232,8 +269,24 @@ public class MainActivity extends Activity {
             PlayerService.Track t = new PlayerService.Track();
             t.uri = u;
             t.title = fileName(u);
-            t.artist = "Seçilen dosya";
-            picked.add(t);
+            String mime = null;
+            try { mime = getContentResolver().getType(u); } catch (Exception ignored) {}
+            t.video = mime != null && mime.startsWith("video");
+            t.artist = t.video ? "Seçilen video" : "Seçilen dosya";
+            (t.video ? vPicked : picked).add(t);
+        }
+        if (!vPicked.isEmpty()) {
+            vAll.addAll(0, vPicked);
+            vFilter = "";
+            applyVideoFilter();
+            showTab(1);
+            if (svc != null) {
+                startService(new Intent(this, PlayerService.class));
+                svc.setList(vPicked, 0);
+                startActivity(new Intent(this, VideoActivity.class));
+            }
+            if (!picked.isEmpty()) { all.addAll(0, picked); applyFilter(); }
+            return;
         }
         all.addAll(0, picked);
         filter = "";
@@ -297,18 +350,19 @@ public class MainActivity extends Activity {
 
         LinearLayout tabRow = new LinearLayout(this);
         tabRow.setPadding(dp(12), 0, dp(12), dp(8));
-        String[] names = {"Şarkılar", "Ekolayzır", "8D ve Efektler"};
+        String[] names = {"Şarkılar", "Videolar", "Ekolayzır", "8D Efekt"};
         tabs = new TextView[names.length];
         for (int i = 0; i < names.length; i++) {
             final int k = i;
-            TextView t = text(names[i], 14, TXT, true);
+            TextView t = text(names[i], 12.5f, TXT, true);
+            t.setSingleLine(true);
             t.setGravity(Gravity.CENTER);
             t.setPadding(0, dp(10), 0, dp(10));
             t.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) { showTab(k); }
             });
             LinearLayout.LayoutParams p = lp(0, WC, 1);
-            p.setMargins(dp(4), 0, dp(4), 0);
+            p.setMargins(dp(3), 0, dp(3), 0);
             tabRow.addView(t, p);
             tabs[i] = t;
         }
@@ -320,7 +374,7 @@ public class MainActivity extends Activity {
         root.addView(buildPlayerBar());
         setContentView(root);
         songsView = buildSongs();
-        showTab(0);
+        videosView = buildVideos();
     }
 
     private void showTab(int k) {
@@ -331,8 +385,9 @@ public class MainActivity extends Activity {
         }
         content.removeAllViews();
         if (k == 0) content.addView(songsView);
+        else if (k == 1) content.addView(videosView);
         else if (svc == null) content.addView(text("Yükleniyor…", 14, SUB, false));
-        else content.addView(k == 1 ? buildEq() : buildFx());
+        else content.addView(k == 2 ? buildEq() : buildFx());
     }
 
     private View buildSongs() {
@@ -397,6 +452,198 @@ public class MainActivity extends Activity {
         return box;
     }
 
+    // ---------- videolar ----------
+
+    private void loadVideos() {
+        new Thread(new Runnable() {
+            @Override public void run() {
+                final List<PlayerService.Track> found = new ArrayList<>();
+                try {
+                    Uri base = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                    Cursor c = getContentResolver().query(base,
+                            new String[]{MediaStore.Video.Media._ID, MediaStore.Video.Media.DISPLAY_NAME,
+                                    MediaStore.Video.Media.BUCKET_DISPLAY_NAME, MediaStore.Video.Media.DURATION},
+                            null, null, MediaStore.Video.Media.DATE_ADDED + " DESC");
+                    if (c != null) {
+                        while (c.moveToNext()) {
+                            PlayerService.Track t = new PlayerService.Track();
+                            t.id = c.getLong(0);
+                            t.uri = ContentUris.withAppendedId(base, t.id);
+                            String n = c.getString(1) == null ? "Video" : c.getString(1);
+                            int dot = n.lastIndexOf('.');
+                            t.title = dot > 0 ? n.substring(0, dot) : n;
+                            t.artist = c.getString(2) == null ? "Video" : c.getString(2);
+                            t.dur = c.getLong(3);
+                            t.video = true;
+                            found.add(t);
+                        }
+                        c.close();
+                    }
+                } catch (Exception ignored) {}
+                h.post(new Runnable() {
+                    @Override public void run() {
+                        List<PlayerService.Track> added = new ArrayList<>();
+                        for (PlayerService.Track t : vAll) if (t.id == 0) added.add(t);
+                        vAll.clear();
+                        vAll.addAll(added);
+                        vAll.addAll(found);
+                        applyVideoFilter();
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void applyVideoFilter() {
+        vShown.clear();
+        String f = vFilter.toLowerCase(Locale.ROOT).trim();
+        for (PlayerService.Track t : vAll) {
+            if (f.isEmpty() || t.title.toLowerCase(Locale.ROOT).contains(f)
+                    || t.artist.toLowerCase(Locale.ROOT).contains(f)) vShown.add(t);
+        }
+        if (vAdapter != null) vAdapter.notifyDataSetChanged();
+        if (vEmpty != null) {
+            vEmpty.setVisibility(vShown.isEmpty() ? View.VISIBLE : View.GONE);
+            vEmpty.setText(!granted(videoPerm())
+                    ? "Telefondaki videoları göstermek için izin gerekli.\nİzin vermek için buraya dokunun veya \"Dosya aç\" ile video seçin."
+                    : vAll.isEmpty() ? "Telefonda video bulunamadı.\n\"Dosya aç\" ile video seçebilirsiniz."
+                    : "Aramaya uygun video yok.");
+        }
+    }
+
+    private View buildVideos() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+
+        LinearLayout top = new LinearLayout(this);
+        top.setGravity(Gravity.CENTER_VERTICAL);
+        top.setPadding(dp(16), 0, dp(16), dp(8));
+        EditText search = new EditText(this);
+        search.setHint("Video veya klasör ara");
+        search.setHintTextColor(SUB);
+        search.setTextColor(TXT);
+        search.setTextSize(14);
+        search.setSingleLine(true);
+        search.setBackground(round(CARD, 12));
+        search.setPadding(dp(14), dp(10), dp(14), dp(10));
+        search.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {}
+            @Override public void afterTextChanged(Editable s) {
+                vFilter = s.toString();
+                applyVideoFilter();
+            }
+        });
+        top.addView(search, lp(0, WC, 1));
+        TextView open = text("Dosya aç", 13, TXT, true);
+        open.setBackground(round(ACC, 12));
+        open.setPadding(dp(14), dp(11), dp(14), dp(11));
+        open.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { openFiles(); }
+        });
+        LinearLayout.LayoutParams op = lp(WC, WC, 0);
+        op.leftMargin = dp(8);
+        top.addView(open, op);
+        box.addView(top);
+
+        FrameLayout f = new FrameLayout(this);
+        ListView lv = new ListView(this);
+        lv.setDivider(null);
+        lv.setSelector(new android.graphics.drawable.ColorDrawable(0));
+        vAdapter = new VideoAdapter();
+        lv.setAdapter(vAdapter);
+        lv.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
+            @Override public void onItemClick(android.widget.AdapterView<?> p, View v, int pos, long id) {
+                if (svc == null) return;
+                startService(new Intent(MainActivity.this, PlayerService.class));
+                svc.setList(vShown, pos);
+                startActivity(new Intent(MainActivity.this, VideoActivity.class));
+            }
+        });
+        f.addView(lv);
+        vEmpty = text("Videolar yükleniyor…", 14, SUB, false);
+        vEmpty.setGravity(Gravity.CENTER);
+        vEmpty.setPadding(dp(32), dp(32), dp(32), dp(32));
+        vEmpty.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                if (!granted(videoPerm())) askPermission();
+            }
+        });
+        f.addView(vEmpty, new FrameLayout.LayoutParams(MP, MP));
+        box.addView(f, lp(MP, 0, 1));
+        return box;
+    }
+
+    private class VideoAdapter extends BaseAdapter {
+        @Override public int getCount() { return vShown.size(); }
+        @Override public Object getItem(int i) { return vShown.get(i); }
+        @Override public long getItemId(int i) { return i; }
+        @Override public View getView(int i, View cv, ViewGroup parent) {
+            LinearLayout row = (LinearLayout) cv;
+            if (row == null) {
+                row = new LinearLayout(MainActivity.this);
+                row.setGravity(Gravity.CENTER_VERTICAL);
+                row.setPadding(dp(16), dp(7), dp(16), dp(7));
+                ImageView iv = new ImageView(MainActivity.this);
+                iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                iv.setBackground(round(CARD, 10));
+                iv.setClipToOutline(true);
+                row.addView(iv, lp(dp(120), dp(68), 0));
+                LinearLayout col = new LinearLayout(MainActivity.this);
+                col.setOrientation(LinearLayout.VERTICAL);
+                col.setPadding(dp(12), 0, 0, 0);
+                TextView a = text("", 14, TXT, false);
+                a.setMaxLines(2);
+                a.setEllipsize(TextUtils.TruncateAt.END);
+                TextView b = text("", 12, SUB, false);
+                b.setSingleLine(true);
+                b.setEllipsize(TextUtils.TruncateAt.END);
+                col.addView(a);
+                col.addView(b);
+                row.addView(col, lp(0, WC, 1));
+            }
+            PlayerService.Track t = vShown.get(i);
+            boolean cur = svc != null && svc.current() != null && svc.current().uri.equals(t.uri);
+            ImageView iv = (ImageView) row.getChildAt(0);
+            LinearLayout col = (LinearLayout) row.getChildAt(1);
+            TextView a = (TextView) col.getChildAt(0);
+            a.setText(t.title);
+            a.setTextColor(cur ? ACC2 : TXT);
+            ((TextView) col.getChildAt(1)).setText(t.dur > 0 ? time(t.dur) + " · " + t.artist : t.artist);
+            loadThumb(iv, t);
+            return row;
+        }
+    }
+
+    private void loadThumb(final ImageView iv, final PlayerService.Track t) {
+        final String key = t.uri.toString();
+        iv.setTag(key);
+        Bitmap b = thumbs.get(key);
+        iv.setImageBitmap(b);
+        if (b != null) return;
+        pool.submit(new Runnable() {
+            @Override public void run() {
+                Bitmap bm = null;
+                try {
+                    if (Build.VERSION.SDK_INT >= 29) {
+                        bm = getContentResolver().loadThumbnail(t.uri, new Size(320, 180), null);
+                    } else if (t.id > 0) {
+                        bm = MediaStore.Video.Thumbnails.getThumbnail(getContentResolver(), t.id,
+                                MediaStore.Video.Thumbnails.MINI_KIND, null);
+                    }
+                } catch (Throwable ignored) {}
+                if (bm == null) return;
+                final Bitmap fb = bm;
+                h.post(new Runnable() {
+                    @Override public void run() {
+                        thumbs.put(key, fb);
+                        if (key.equals(iv.getTag())) iv.setImageBitmap(fb);
+                    }
+                });
+            }
+        });
+    }
+
     private class SongAdapter extends BaseAdapter {
         @Override public int getCount() { return shown.size(); }
         @Override public Object getItem(int i) { return shown.get(i); }
@@ -441,6 +688,14 @@ public class MainActivity extends Activity {
         npTitle.setEllipsize(TextUtils.TruncateAt.END);
         npArtist = text("", 12, SUB, false);
         npArtist.setSingleLine(true);
+        View.OnClickListener openVideo = new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                if (svc != null && svc.current() != null && svc.current().video)
+                    startActivity(new Intent(MainActivity.this, VideoActivity.class));
+            }
+        };
+        npTitle.setOnClickListener(openVideo);
+        npArtist.setOnClickListener(openVideo);
         bar.addView(npTitle);
         bar.addView(npArtist);
 
@@ -531,7 +786,7 @@ public class MainActivity extends Activity {
         if (svc == null || npTitle == null) return;
         PlayerService.Track t = svc.current();
         npTitle.setText(t == null ? "Şarkı seçin" : t.title);
-        npArtist.setText(t == null ? "" : t.artist);
+        npArtist.setText(t == null ? "" : t.video ? "▶ Videoyu açmak için dokunun" : t.artist);
         bPlay.setText(svc.isPlaying() ? "⏸" : "▶");
         bShuffle.setAlpha(svc.shuffle ? 1f : 0.35f);
         bRepeat.setAlpha(svc.repeat == 0 ? 0.35f : 1f);
@@ -547,11 +802,13 @@ public class MainActivity extends Activity {
         if ((u == null ? lastUri != null : !u.equals(lastUri)) && adapter != null) {
             lastUri = u;
             adapter.notifyDataSetChanged();
+            if (vAdapter != null) vAdapter.notifyDataSetChanged();
         }
     }
 
     private static String time(long ms) {
         long s = ms / 1000;
+        if (s >= 3600) return String.format(Locale.US, "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60);
         return String.format(Locale.US, "%d:%02d", s / 60, s % 60);
     }
 
@@ -664,7 +921,7 @@ public class MainActivity extends Activity {
             chips(c2, PRESET_NAMES, -1, new IntCb() {
                 @Override public void on(int k) {
                     svc.usePreset(PRESETS[k]);
-                    showTab(1);
+                    showTab(2);
                 }
             });
             final int min = svc.bandMin(), max = svc.bandMax();
@@ -711,7 +968,7 @@ public class MainActivity extends Activity {
                     svc.applySurround();
                 }
                 svc.save();
-                showTab(2);
+                showTab(3);
             }
         });
         c8.addView(sw);
@@ -798,7 +1055,7 @@ public class MainActivity extends Activity {
                 svc.applyAll();
                 svc.save();
                 toast("Ayarlar sıfırlandı");
-                showTab(2);
+                showTab(3);
             }
         });
         return sv;

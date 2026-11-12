@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.view.SurfaceHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         public String title = "";
         public String artist = "";
         public long dur;
+        public long id;
+        public boolean video;
     }
 
     public class LocalBinder extends Binder {
@@ -53,7 +56,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public List<Track> list = new ArrayList<>();
     public int index = -1;
-    public Runnable onChange;
+    public final List<Runnable> listeners = new ArrayList<>();
+    private SurfaceHolder holder;
+    public int vw, vh;
 
     private MediaPlayer mp;
     private boolean prepared;
@@ -127,6 +132,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mp.setOnPreparedListener(this);
         mp.setOnCompletionListener(this);
         mp.setOnErrorListener(this);
+        mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+            @Override public void onVideoSizeChanged(MediaPlayer m, int w, int hh) { vw = w; vh = hh; changed(); }
+        });
         try { mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK); } catch (Exception ignored) {}
 
         try { eq = new Equalizer(0, sid); eq.setEnabled(true); } catch (Throwable t) { eq = null; }
@@ -194,7 +202,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             mp.setAudioSessionId(sid);
             mp.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
+                    .setContentType(list.get(i).video ? AudioAttributes.CONTENT_TYPE_MOVIE : AudioAttributes.CONTENT_TYPE_MUSIC).build());
+            vw = 0; vh = 0;
+            if (holder != null) mp.setDisplay(holder);
             mp.setDataSource(this, list.get(i).uri);
             mp.prepareAsync();
         } catch (Exception e) {
@@ -302,6 +312,16 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public void seek(int ms) {
         try { if (prepared) mp.seekTo(ms); } catch (Exception ignored) {}
+    }
+
+    public void setDisplay(SurfaceHolder sh) {
+        holder = sh;
+        try { mp.setDisplay(sh); } catch (Exception ignored) {}
+    }
+
+    public void seekBy(int ms) {
+        int d = duration();
+        seek(Math.max(0, Math.min(d > 0 ? d - 500 : 0, position() + ms)));
     }
 
     public Track current() {
@@ -471,7 +491,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(1, buildNotification());
             } catch (Exception ignored) {}
         }
-        if (onChange != null) onChange.run();
+        for (Runnable r : new ArrayList<>(listeners)) r.run();
     }
 
     private PendingIntent action(String a, int code) {
