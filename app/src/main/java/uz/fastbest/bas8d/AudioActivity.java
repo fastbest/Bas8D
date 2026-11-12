@@ -76,6 +76,11 @@ public class AudioActivity extends Activity {
 
     private int dp(float v) { return Ui.dp(this, v); }
 
+    @Override public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.hold, R.anim.down_out);
+    }
+
     @Override protected void onCreate(Bundle s) {
         super.onCreate(s);
         Ui.apply(this);
@@ -277,6 +282,13 @@ public class AudioActivity extends Activity {
     private void applyQueueVisibility() {
         queueView.setVisibility(showQueue ? View.VISIBLE : View.GONE);
         coverBox.setVisibility(showQueue ? View.GONE : View.VISIBLE);
+        View in = showQueue ? queueView : coverBox;
+        in.setAlpha(0f);
+        in.setTranslationY(dp(40));
+        in.setScaleX(0.96f);
+        in.setScaleY(0.96f);
+        in.animate().alpha(1f).translationY(0).scaleX(1f).scaleY(1f).setDuration(340)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator(2f)).start();
         bQueue.setImageDrawable(Ui.icon(this, R.drawable.ic_queue_play, showQueue ? ORANGE : TXT));
     }
 
@@ -353,7 +365,8 @@ public class AudioActivity extends Activity {
                 case 0: Ui.sleepDialog(this, svc); break;
                 case 1: Ui.speedDialog(this, svc); break;
                 case 2: Ui.jumpDialog(this, svc); break;
-                case 3: startActivity(new Intent(this, EffectsActivity.class)); break;
+                case 3: startActivity(new Intent(this, EffectsActivity.class));
+                    overridePendingTransition(R.anim.right_in, R.anim.left_out); break;
                 case 4: Ui.bookmarksDialog(this, svc); break;
                 case 5: Ui.abRepeat(this, svc); break;
                 case 6: Ui.savePlaylistDialog(this, svc.list); break;

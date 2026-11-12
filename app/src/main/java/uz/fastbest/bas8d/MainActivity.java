@@ -94,8 +94,8 @@ public class MainActivity extends Activity {
 
     // görünümler
     private LinearLayout topBar;
-    private HorizontalScrollView tabScroll;
-    private LinearLayout tabRow;
+    private LiquidTabs tabs;
+    private CurvedNav nav;
     private ListView listView;
     private RowAdapter adapter;
     private TextView emptyView;
@@ -104,7 +104,6 @@ public class MainActivity extends Activity {
     private TextView miniTitle, miniSub, miniTime;
     private ImageView miniPlay;
     private ProgressBar miniProg;
-    private final LinearLayout[] navItems = new LinearLayout[5];
     private String lastUri = "";
 
     private final Runnable uiListener = () -> h.post(this::refreshMini);
@@ -172,7 +171,7 @@ public class MainActivity extends Activity {
         if (query != null) { closeSearch(); return; }
         if (!stack.isEmpty()) {
             stack.remove(stack.size() - 1);
-            render();
+            render(-1);
             return;
         }
         super.onBackPressed();
@@ -236,12 +235,14 @@ public class MainActivity extends Activity {
         topBar.setMinimumHeight(dp(64));
         root.addView(topBar, new LinearLayout.LayoutParams(MP, WC));
 
-        tabScroll = new HorizontalScrollView(this);
-        tabScroll.setHorizontalScrollBarEnabled(false);
-        tabScroll.setBackgroundColor(BAR);
-        tabRow = new LinearLayout(this);
-        tabScroll.addView(tabRow);
-        root.addView(tabScroll, new LinearLayout.LayoutParams(MP, WC));
+        tabs = new LiquidTabs(this);
+        tabs.setOnSelect(k -> {
+            int dir = k > subTab[section] ? 1 : -1;
+            subTab[section] = k;
+            render(dir);
+            listView.setSelection(0);
+        });
+        root.addView(tabs, new LinearLayout.LayoutParams(MP, WC));
 
         FrameLayout content = new FrameLayout(this);
         listView = new ListView(this);
@@ -249,7 +250,7 @@ public class MainActivity extends Activity {
         listView.setSelector(new android.graphics.drawable.ColorDrawable(0));
         listView.setFastScrollEnabled(true);
         listView.setClipToPadding(false);
-        listView.setPadding(0, dp(4), 0, dp(90));
+        listView.setPadding(0, dp(4), 0, dp(120));
         adapter = new RowAdapter();
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((p, v, pos, id) -> {
@@ -275,45 +276,31 @@ public class MainActivity extends Activity {
         fab.setBackground(Ui.circle(ORANGE, 0, 0));
         fab.setElevation(dp(6));
         FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(dp(60), dp(60), Gravity.BOTTOM | Gravity.END);
-        fp.setMargins(0, 0, dp(18), dp(18));
+        fp.setMargins(0, 0, dp(18), dp(18) + dp(26));
         content.addView(fab, fp);
         fab.setOnClickListener(v -> shuffleAll());
         root.addView(content, new LinearLayout.LayoutParams(MP, 0, 1));
 
         root.addView(buildMini());
 
-        View line = new View(this);
-        line.setBackgroundColor(Ui.LINE);
-        root.addView(line, new LinearLayout.LayoutParams(MP, 1));
-
-        LinearLayout nav = new LinearLayout(this);
-        nav.setBackgroundColor(BAR);
-        nav.setPadding(0, dp(8), 0, dp(8));
-        for (int i = 0; i < 5; i++) {
-            final int k = i;
-            LinearLayout it = new LinearLayout(this);
-            it.setOrientation(LinearLayout.VERTICAL);
-            it.setGravity(Gravity.CENTER);
-            Ui.ripple(it, true);
-            ImageView iv = Ui.img(this, SECTION_ICONS[i], ICON, 28, 0);
-            it.addView(iv);
-            TextView t = Ui.text(this, SECTION_NAMES[i], 13, ICON, false);
-            t.setPadding(0, dp(3), 0, 0);
-            t.setSingleLine(true);
-            it.addView(t);
-            it.setOnClickListener(v -> {
-                if (section == k && !stack.isEmpty()) stack.clear();
-                section = k;
-                stack.clear();
-                query = null;
-                sp.edit().putInt("section", k).apply();
-                render();
-                listView.setSelection(0);
-            });
-            nav.addView(it, new LinearLayout.LayoutParams(0, WC, 1));
-            navItems[i] = it;
-        }
-        root.addView(nav, new LinearLayout.LayoutParams(MP, WC));
+        nav = new CurvedNav(this, SECTION_ICONS, SECTION_NAMES, section);
+        nav.setOnSelect(k -> {
+            if (k == section) {
+                if (!stack.isEmpty() || query != null) { stack.clear(); query = null; render(-1); }
+                listView.smoothScrollToPosition(0);
+                return;
+            }
+            int dir = k > section ? 1 : -1;
+            section = k;
+            stack.clear();
+            query = null;
+            sp.edit().putInt("section", k).apply();
+            render(dir);
+            listView.setSelection(0);
+        });
+        LinearLayout.LayoutParams np = new LinearLayout.LayoutParams(MP, WC);
+        np.topMargin = -(int) nav.riseHeight();
+        root.addView(nav, np);
         setContentView(root);
     }
 
@@ -328,7 +315,7 @@ public class MainActivity extends Activity {
         mini.addView(miniProg, new LinearLayout.LayoutParams(MP, dp(3)));
         LinearLayout row = new LinearLayout(this);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(dp(18), dp(8), dp(12), dp(8));
+        row.setPadding(dp(18), dp(8), dp(12), dp(8) + dp(26));
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
         miniTitle = Ui.text(this, "", 17, TXT, false);
@@ -359,7 +346,7 @@ public class MainActivity extends Activity {
 
     private void openPlayer() {
         if (svc == null || svc.current() == null) return;
-        startActivity(new Intent(this, svc.current().video ? VideoActivity.class : AudioActivity.class));
+        go(new Intent(this, svc.current().video ? VideoActivity.class : AudioActivity.class), true);
     }
 
     private void refreshMini() {
@@ -459,34 +446,27 @@ public class MainActivity extends Activity {
         Ui.menu(anchor, labels, icons, k -> {
             if (k == 0 || k == 1) { sp.edit().putInt("sort", k).apply(); render(); }
             else if (k == 2) { loadLibrary(); Ui.toast(this, "Kitaplık yenileniyor…"); }
-            else if (k == 3) startActivity(new Intent(this, EffectsActivity.class));
+            else if (k == 3) go(new Intent(this, EffectsActivity.class), false);
             else if (k == 4) Ui.controlSettings(this, false);
             else if (k == 5 && svc != null) Ui.sleepDialog(this, svc);
-            else if (k == 6) startActivity(new Intent(this, AppearanceActivity.class));
+            else if (k == 6) go(new Intent(this, AppearanceActivity.class), false);
         });
     }
 
     // ---------- sekmeler ----------
 
     private void buildTabs() {
-        tabRow.removeAllViews();
         String[] names = SUBTABS[section];
         boolean show = stack.isEmpty() && query == null && names.length > 0;
-        tabScroll.setVisibility(show ? View.VISIBLE : View.GONE);
+        boolean was = tabs.getVisibility() == View.VISIBLE;
+        tabs.setVisibility(show ? View.VISIBLE : View.GONE);
         if (!show) return;
-        for (int i = 0; i < names.length; i++) {
-            final int k = i;
-            TextView t = Ui.text(this, names[i], 16, i == subTab[section] ? ORANGE : TXT, true);
-            t.setLetterSpacing(0.08f);
-            t.setGravity(Gravity.CENTER);
-            t.setPadding(dp(20), dp(16), dp(20), dp(16));
-            t.setBackground(i == subTab[section] ? underline() : null);
-            t.setOnClickListener(v -> {
-                subTab[section] = k;
-                render();
-                listView.setSelection(0);
-            });
-            tabRow.addView(t);
+        tabs.set(names, subTab[section], true);
+        if (!was) {
+            tabs.setAlpha(0f);
+            tabs.setTranslationY(-dp(12));
+            tabs.animate().alpha(1f).translationY(0).setDuration(260)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
         }
     }
 
@@ -504,18 +484,42 @@ public class MainActivity extends Activity {
 
     // ---------- içerik ----------
 
-    private void render() {
+    private void render() { render(0); }
+
+    /** dir: 0 animasyonsuz, 1 sağdan gelir (ileri), -1 soldan gelir (geri). */
+    private void render(int dir) {
         buildTopBar();
         buildTabs();
-        for (int i = 0; i < 5; i++) {
-            LinearLayout it = navItems[i];
-            int c = i == section ? ORANGE : ICON;
-            ((ImageView) it.getChildAt(0)).setImageDrawable(Ui.icon(this, SECTION_ICONS[i], c));
-            ((TextView) it.getChildAt(1)).setTextColor(c);
-        }
+        if (nav.getSelected() != section) nav.select(section, true);
         rows = buildRows();
         adapter.notifyDataSetChanged();
         updateEmpty();
+        animateContent(dir);
+    }
+
+    private void animateContent(int dir) {
+        if (dir == 0) return;
+        android.view.animation.Interpolator in = new android.view.animation.DecelerateInterpolator(2.2f);
+        for (View v : new View[]{listView, emptyView}) {
+            v.animate().cancel();
+            v.setTranslationX(dir * dp(80));
+            v.setAlpha(0f);
+            v.animate().translationX(0).alpha(1f).setDuration(340).setInterpolator(in).start();
+        }
+        if (fab.getVisibility() == View.VISIBLE) {
+            fab.animate().cancel();
+            fab.setScaleX(0f);
+            fab.setScaleY(0f);
+            fab.setRotation(-120f);
+            fab.animate().scaleX(1f).scaleY(1f).rotation(0f).setStartDelay(120).setDuration(380)
+                    .setInterpolator(new android.view.animation.OvershootInterpolator(2f)).start();
+        }
+    }
+
+    void go(Intent i, boolean player) {
+        startActivity(i);
+        if (player) overridePendingTransition(R.anim.up_in, R.anim.hold);
+        else overridePendingTransition(R.anim.right_in, R.anim.left_out);
     }
 
     private void updateEmpty() {
@@ -612,7 +616,7 @@ public class MainActivity extends Activity {
 
     private void push(String title, Supplier<List<Row>> build) {
         stack.add(new Level(title, build));
-        render();
+        render(1);
         listView.setSelection(0);
     }
 
@@ -729,12 +733,12 @@ public class MainActivity extends Activity {
         List<Row> out = new ArrayList<>();
         out.add(action("Görünüm", "Tema ve renk: " + Ui.THEMES[Math.max(0, Math.min(2, sp.getInt("tema", 2)))]
                         + (Ui.GLASS ? " · Cam · " : " · ") + Ui.SWATCHES[Math.max(0, Math.min(Ui.SWATCHES.length - 1, sp.getInt("renk", 0)))][0],
-                R.drawable.ic_aspect, () -> startActivity(new Intent(this, AppearanceActivity.class))));
+                R.drawable.ic_aspect, () -> go(new Intent(this, AppearanceActivity.class), false)));
         out.add(action("Geçmiş", "Son oynatılan kayıtlar", R.drawable.ic_history, this::openHistory));
         out.add(action("Dengeleyici", "Bas, tiz ve ekolayzır", R.drawable.ic_tune,
-                () -> startActivity(new Intent(this, EffectsActivity.class).putExtra("tab", 0))));
+                () -> go(new Intent(this, EffectsActivity.class).putExtra("tab", 0), false)));
         out.add(action("8D ses ve efektler", "8D, ses yükseltme, surround, yankı, perde", R.drawable.ic_headset,
-                () -> startActivity(new Intent(this, EffectsActivity.class).putExtra("tab", 1))));
+                () -> go(new Intent(this, EffectsActivity.class).putExtra("tab", 1), false)));
         out.add(action("Uyku zamanlayıcı", "Belirlenen süre sonunda oynatmayı durdur", R.drawable.ic_timer,
                 () -> { if (svc != null) Ui.sleepDialog(this, svc); }));
         out.add(action("Denetim ayarları", "Atlama süresi, jestler, kulaklık", R.drawable.ic_settings,
@@ -776,7 +780,7 @@ public class MainActivity extends Activity {
         if (svc == null || l.isEmpty()) return;
         startService(new Intent(this, PlayerService.class));
         svc.setList(l, i);
-        if (l.get(i).video) startActivity(new Intent(this, VideoActivity.class));
+        if (l.get(i).video) go(new Intent(this, VideoActivity.class), true);
     }
 
     private void shuffle(List<Track> l) {
@@ -826,7 +830,7 @@ public class MainActivity extends Activity {
                     if (svc != null) {
                         startService(new Intent(this, PlayerService.class));
                         svc.setList(list, idx);
-                        startActivity(new Intent(this, AudioActivity.class));
+                        go(new Intent(this, AudioActivity.class), true);
                     }
                     break;
                 case "Bilgiler": Ui.infoDialog(this, t, svc); break;

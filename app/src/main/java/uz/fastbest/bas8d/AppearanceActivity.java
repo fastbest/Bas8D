@@ -26,6 +26,11 @@ public class AppearanceActivity extends Activity {
 
     private int dp(float v) { return Ui.dp(this, v); }
 
+    @Override public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.left_in, R.anim.right_out);
+    }
+
     @Override protected void onCreate(Bundle s) {
         super.onCreate(s);
         sp = Ui.prefs(this);

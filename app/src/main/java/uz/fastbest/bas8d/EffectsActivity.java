@@ -134,6 +134,11 @@ public class EffectsActivity extends Activity {
 
     private int dp(float v) { return Math.round(v * getResources().getDisplayMetrics().density); }
 
+    @Override public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.left_in, R.anim.right_out);
+    }
+
     private GradientDrawable round(int color, float r) {
         GradientDrawable g = new GradientDrawable();
         g.setColor(color);

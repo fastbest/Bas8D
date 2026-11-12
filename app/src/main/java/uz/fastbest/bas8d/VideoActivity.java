@@ -92,6 +92,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
 
     private int dp(float v) { return Ui.dp(this, v); }
 
+    @Override public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.hold, R.anim.down_out);
+    }
+
     @Override protected void onCreate(Bundle s) {
         super.onCreate(s);
         sp = Ui.prefs(this);
@@ -508,11 +513,27 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private void showControls(boolean on) {
         if (locked || pip) on = false;
         shown = on;
-        top.setVisibility(on ? View.VISIBLE : View.GONE);
-        bottom.setVisibility(on ? View.VISIBLE : View.GONE);
+        fade(top, on, -1);
+        fade(bottom, on, 1);
         h.removeCallbacks(hide);
         if (on) h.postDelayed(hide, 4000);
         else immersive();
+    }
+
+    private void fade(View v, boolean on, int dir) {
+        v.animate().cancel();
+        if (on) {
+            if (v.getVisibility() != View.VISIBLE) {
+                v.setVisibility(View.VISIBLE);
+                v.setAlpha(0f);
+                v.setTranslationY(dir * dp(24));
+            }
+            v.animate().alpha(1f).translationY(0).setDuration(240)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
+        } else if (v.getVisibility() == View.VISIBLE) {
+            v.animate().alpha(0f).translationY(dir * dp(24)).setDuration(200)
+                    .withEndAction(() -> v.setVisibility(View.GONE)).start();
+        }
     }
 
     private void poke() {
@@ -561,6 +582,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 case 4:
                     keepOnce = true;
                     startActivity(new Intent(this, EffectsActivity.class));
+                    overridePendingTransition(R.anim.right_in, R.anim.left_out);
                     break;
                 case 5:
                     keepOnce = true;
