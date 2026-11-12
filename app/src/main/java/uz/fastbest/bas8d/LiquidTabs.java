@@ -70,7 +70,7 @@ public class LiquidTabs extends HorizontalScrollView {
         sel = i;
         if (!animate) { p = 1f; colors(); strip.invalidate(); return; }
         anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setDuration(520);
+        anim.setDuration(300);
         anim.setInterpolator(new LinearInterpolator());
         anim.addUpdateListener(a -> { p = (float) a.getAnimatedValue(); colors(); strip.invalidate(); });
         anim.start();

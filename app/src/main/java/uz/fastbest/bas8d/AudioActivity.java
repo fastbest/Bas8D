@@ -287,7 +287,7 @@ public class AudioActivity extends Activity {
         in.setTranslationY(dp(40));
         in.setScaleX(0.96f);
         in.setScaleY(0.96f);
-        in.animate().alpha(1f).translationY(0).scaleX(1f).scaleY(1f).setDuration(340)
+        in.animate().alpha(1f).translationY(0).scaleX(1f).scaleY(1f).setDuration(210)
                 .setInterpolator(new android.view.animation.DecelerateInterpolator(2f)).start();
         bQueue.setImageDrawable(Ui.icon(this, R.drawable.ic_queue_play, showQueue ? ORANGE : TXT));
     }

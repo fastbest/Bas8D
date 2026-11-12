@@ -465,7 +465,7 @@ public class MainActivity extends Activity {
         if (!was) {
             tabs.setAlpha(0f);
             tabs.setTranslationY(-dp(12));
-            tabs.animate().alpha(1f).translationY(0).setDuration(260)
+            tabs.animate().alpha(1f).translationY(0).setDuration(170)
                     .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
         }
     }
@@ -504,14 +504,14 @@ public class MainActivity extends Activity {
             v.animate().cancel();
             v.setTranslationX(dir * dp(80));
             v.setAlpha(0f);
-            v.animate().translationX(0).alpha(1f).setDuration(340).setInterpolator(in).start();
+            v.animate().translationX(0).alpha(1f).setDuration(210).setInterpolator(in).start();
         }
         if (fab.getVisibility() == View.VISIBLE) {
             fab.animate().cancel();
             fab.setScaleX(0f);
             fab.setScaleY(0f);
             fab.setRotation(-120f);
-            fab.animate().scaleX(1f).scaleY(1f).rotation(0f).setStartDelay(120).setDuration(380)
+            fab.animate().scaleX(1f).scaleY(1f).rotation(0f).setStartDelay(50).setDuration(260)
                     .setInterpolator(new android.view.animation.OvershootInterpolator(2f)).start();
         }
     }

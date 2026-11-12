@@ -69,7 +69,7 @@ public class CurvedNav extends View {
         sel = i;
         if (!animate || from == sel) { p = 1f; invalidate(); return; }
         anim = ValueAnimator.ofFloat(0f, 1f);
-        anim.setDuration(620);
+        anim.setDuration(380);
         anim.setInterpolator(new LinearInterpolator());
         anim.addUpdateListener(a -> { p = (float) a.getAnimatedValue(); invalidate(); });
         anim.start();

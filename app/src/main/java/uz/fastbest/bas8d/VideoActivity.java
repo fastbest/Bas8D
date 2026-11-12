@@ -528,10 +528,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 v.setAlpha(0f);
                 v.setTranslationY(dir * dp(24));
             }
-            v.animate().alpha(1f).translationY(0).setDuration(240)
+            v.animate().alpha(1f).translationY(0).setDuration(150)
                     .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
         } else if (v.getVisibility() == View.VISIBLE) {
-            v.animate().alpha(0f).translationY(dir * dp(24)).setDuration(200)
+            v.animate().alpha(0f).translationY(dir * dp(24)).setDuration(130)
                     .withEndAction(() -> v.setVisibility(View.GONE)).start();
         }
     }
