@@ -41,11 +41,12 @@ import java.util.List;
 import uz.fastbest.bas8d.PlayerService.Track;
 
 import static uz.fastbest.bas8d.Ui.ORANGE;
-import static uz.fastbest.bas8d.Ui.TXT;
 import static uz.fastbest.bas8d.Ui.WC;
 
 /** VLC tarzı video oynatıcı. */
 public class VideoActivity extends Activity implements SurfaceHolder.Callback {
+
+    private static final int TXT = 0xFFFFFFFF;
 
     private PlayerService svc;
     private final Handler h = new Handler(Looper.getMainLooper());
@@ -423,7 +424,28 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         lockBtn.setPadding(dp(14), dp(14), dp(14), dp(14));
         lockBtn.setBackground(Ui.circle(0xAA000000, ORANGE, dp(2)));
         lockBtn.setVisibility(View.GONE);
-        lockBtn.setOnClickListener(v -> lock(false));
+        lockBtn.setOnTouchListener((v, e) -> {
+            if (e.getAction() == MotionEvent.ACTION_DOWN) {
+                h.removeCallbacks(hideLock);
+                holdLeft = 3;
+                flash("Kilidi açmak için basılı tutun\n3");
+                h.postDelayed(holdTick, 1000);
+                lockBtn.setScaleX(1.15f);
+                lockBtn.setScaleY(1.15f);
+            } else if (e.getAction() == MotionEvent.ACTION_UP || e.getAction() == MotionEvent.ACTION_CANCEL) {
+                lockBtn.setScaleX(1f);
+                lockBtn.setScaleY(1f);
+                if (holdLeft > 0) {
+                    h.removeCallbacks(holdTick);
+                    holdLeft = 0;
+                    if (locked) {
+                        flash("Kilidi açmak için 3 saniye basılı tutun");
+                        flashLock();
+                    }
+                }
+            }
+            return true;
+        });
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dp(56), dp(56), Gravity.BOTTOM | Gravity.START);
         lp.setMargins(dp(24), 0, 0, dp(40));
         root.addView(lockBtn, lp);
@@ -432,6 +454,23 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     private int seekPreview = -1;
+    private int holdLeft;
+
+    private final Runnable holdTick = new Runnable() {
+        @Override public void run() {
+            holdLeft--;
+            if (holdLeft <= 0) {
+                holdLeft = 0;
+                lockBtn.setScaleX(1f);
+                lockBtn.setScaleY(1f);
+                lock(false);
+                flash("Kilit açıldı");
+                return;
+            }
+            flash("Kilidi açmak için basılı tutun\n" + holdLeft);
+            h.postDelayed(this, 1000);
+        }
+    };
 
     private void jump(int dir) {
         if (svc == null) return;
@@ -453,7 +492,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         if (on) {
             showControls(false);
             flashLock();
-            Ui.toast(this, "Ekran kilitlendi. Açmak için kilit düğmesine dokunun.");
+            Ui.toast(this, "Ekran kilitlendi. Açmak için kilit düğmesini 3 saniye basılı tutun.");
         } else {
             lockBtn.setVisibility(View.GONE);
             showControls(true);
@@ -485,7 +524,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         info.setText(s);
         info.setVisibility(View.VISIBLE);
         h.removeCallbacks(hideInfo);
-        h.postDelayed(hideInfo, 900);
+        h.postDelayed(hideInfo, holdLeft > 0 ? 1300 : 900);
     }
 
     private void refresh() {

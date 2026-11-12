@@ -125,14 +125,16 @@ public class MainActivity extends Activity {
         }
     };
 
+    private int builtStamp;
+
     private int dp(float v) { return Ui.dp(this, v); }
 
     @Override protected void onCreate(Bundle s) {
         super.onCreate(s);
         sp = Ui.prefs(this);
         section = sp.getInt("section", 1);
-        getWindow().setStatusBarColor(BAR);
-        getWindow().setNavigationBarColor(BAR);
+        Ui.apply(this);
+        builtStamp = Ui.stamp;
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         buildUi();
         Intent i = new Intent(this, PlayerService.class);
@@ -144,6 +146,8 @@ public class MainActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        Ui.load(this);
+        if (Ui.stamp != builtStamp) { recreate(); return; }
         h.removeCallbacks(tick);
         h.post(tick);
         if (section == 3 || section == 4) render();
@@ -224,7 +228,7 @@ public class MainActivity extends Activity {
     private void buildUi() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(BG);
+        root.setBackground(Ui.pageBg());
 
         topBar = new LinearLayout(this);
         topBar.setBackgroundColor(BAR);
@@ -266,7 +270,7 @@ public class MainActivity extends Activity {
         content.addView(emptyView, new FrameLayout.LayoutParams(MP, MP));
 
         fab = new ImageView(this);
-        fab.setImageDrawable(Ui.icon(this, R.drawable.ic_shuffle, TXT));
+        fab.setImageDrawable(Ui.icon(this, R.drawable.ic_shuffle, 0xFFFFFFFF));
         fab.setPadding(dp(17), dp(17), dp(17), dp(17));
         fab.setBackground(Ui.circle(ORANGE, 0, 0));
         fab.setElevation(dp(6));
@@ -279,7 +283,7 @@ public class MainActivity extends Activity {
         root.addView(buildMini());
 
         View line = new View(this);
-        line.setBackgroundColor(0xFF2A2A2A);
+        line.setBackgroundColor(Ui.LINE);
         root.addView(line, new LinearLayout.LayoutParams(MP, 1));
 
         LinearLayout nav = new LinearLayout(this);
@@ -319,7 +323,7 @@ public class MainActivity extends Activity {
         mini.setBackgroundColor(BAR);
         miniProg = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         miniProg.setProgressTintList(android.content.res.ColorStateList.valueOf(ORANGE));
-        miniProg.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF3A3A3A));
+        miniProg.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(Ui.TRACK));
         miniProg.setMax(1000);
         mini.addView(miniProg, new LinearLayout.LayoutParams(MP, dp(3)));
         LinearLayout row = new LinearLayout(this);
@@ -449,15 +453,16 @@ public class MainActivity extends Activity {
         int sort = sp.getInt("sort", 0);
         String[] labels = {sort == 0 ? "✓ Ada göre sırala" : "Ada göre sırala",
                 sort == 1 ? "✓ Tarihe göre sırala" : "Tarihe göre sırala",
-                "Kitaplığı yenile", "Dengeleyici", "Denetim ayarları", "Uyku zamanlayıcı"};
+                "Kitaplığı yenile", "Dengeleyici", "Denetim ayarları", "Uyku zamanlayıcı", "Görünüm"};
         int[] icons = {R.drawable.ic_sort, R.drawable.ic_history, R.drawable.ic_refresh, R.drawable.ic_tune,
-                R.drawable.ic_settings, R.drawable.ic_timer};
+                R.drawable.ic_settings, R.drawable.ic_timer, R.drawable.ic_aspect};
         Ui.menu(anchor, labels, icons, k -> {
             if (k == 0 || k == 1) { sp.edit().putInt("sort", k).apply(); render(); }
             else if (k == 2) { loadLibrary(); Ui.toast(this, "Kitaplık yenileniyor…"); }
             else if (k == 3) startActivity(new Intent(this, EffectsActivity.class));
             else if (k == 4) Ui.controlSettings(this, false);
             else if (k == 5 && svc != null) Ui.sleepDialog(this, svc);
+            else if (k == 6) startActivity(new Intent(this, AppearanceActivity.class));
         });
     }
 
@@ -722,6 +727,9 @@ public class MainActivity extends Activity {
     // Diğerleri
     private List<Row> moreRows() {
         List<Row> out = new ArrayList<>();
+        out.add(action("Görünüm", "Tema ve renk: " + Ui.THEMES[Math.max(0, Math.min(2, sp.getInt("tema", 2)))]
+                        + (Ui.GLASS ? " · Cam · " : " · ") + Ui.SWATCHES[Math.max(0, Math.min(Ui.SWATCHES.length - 1, sp.getInt("renk", 0)))][0],
+                R.drawable.ic_aspect, () -> startActivity(new Intent(this, AppearanceActivity.class))));
         out.add(action("Geçmiş", "Son oynatılan kayıtlar", R.drawable.ic_history, this::openHistory));
         out.add(action("Dengeleyici", "Bas, tiz ve ekolayzır", R.drawable.ic_tune,
                 () -> startActivity(new Intent(this, EffectsActivity.class).putExtra("tab", 0))));
@@ -888,10 +896,10 @@ public class MainActivity extends Activity {
                 Ui.thumb(iv, r.t);
             } else if (vt == 2) {
                 iv.setImageDrawable(Ui.icon(MainActivity.this, cur ? R.drawable.ic_bars : R.drawable.ic_note,
-                        cur ? TXT : 0xFF8A8A8A));
+                        cur ? TXT : Ui.DIM));
             } else {
                 iv.setImageDrawable(Ui.icon(MainActivity.this, r.icon == 0 ? R.drawable.ic_folder : r.icon,
-                        r.type == Row.ACTION ? ORANGE : 0xFF8A8A8A));
+                        r.type == Row.ACTION ? ORANGE : Ui.DIM));
             }
             more.setVisibility(r.more != null ? View.VISIBLE : View.INVISIBLE);
             final Runnable m = r.more;
@@ -908,7 +916,7 @@ public class MainActivity extends Activity {
             ImageView iv = new ImageView(c);
             if (vt == 1) {
                 iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                iv.setBackground(Ui.round(0xFF2A2A2A, dp(6)));
+                iv.setBackground(Ui.round(Ui.ROW, dp(6)));
                 iv.setClipToOutline(true);
                 row.addView(iv, new LinearLayout.LayoutParams(dp(120), dp(68)));
             } else {

@@ -30,7 +30,8 @@ public class EffectsActivity extends Activity {
     interface IntCb { void on(int v); }
     interface Fmt { String f(int v); }
 
-    static final int BG = Ui.BG, CARD = 0xFF1E1E1E, ACC = Ui.ORANGE, ACC2 = Ui.ORANGE, TXT = Ui.TXT, SUB = Ui.SUB;
+    int BG, CARD, ACC, ACC2, TXT, SUB;
+    private int builtStamp;
     private static final int MP = ViewGroup.LayoutParams.MATCH_PARENT, WC = ViewGroup.LayoutParams.WRAP_CONTENT;
 
     private PlayerService svc;
@@ -48,14 +49,16 @@ public class EffectsActivity extends Activity {
 
     @Override protected void onCreate(Bundle s) {
         super.onCreate(s);
-        getWindow().setStatusBarColor(Ui.BAR);
-        getWindow().setNavigationBarColor(BG);
+        Ui.apply(this);
+        builtStamp = Ui.stamp;
+        BG = Ui.BG; ACC = Ui.ORANGE; ACC2 = Ui.ORANGE; TXT = Ui.TXT; SUB = Ui.SUB;
+        CARD = Ui.GLASS ? Ui.ROW : Ui.LIGHT ? 0xFFFFFFFF : 0xFF1E1E1E;
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         tab = getIntent().getIntExtra("tab", 0);
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(BG);
+        root.setBackground(Ui.pageBg());
 
         LinearLayout bar = new LinearLayout(this);
         bar.setBackgroundColor(Ui.BAR);
@@ -89,6 +92,12 @@ public class EffectsActivity extends Activity {
         Intent i = new Intent(this, PlayerService.class);
         startService(i);
         bindService(i, conn, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        Ui.load(this);
+        if (Ui.stamp != builtStamp) recreate();
     }
 
     @Override protected void onDestroy() {
@@ -135,7 +144,7 @@ public class EffectsActivity extends Activity {
     private TextView text(String s, float sp, int color, boolean bold) {
         TextView t = new TextView(this);
         t.setText(s);
-        t.setTextSize(sp);
+        t.setTextSize(sp * Ui.SCALE);
         t.setTextColor(color);
         if (bold) t.setTypeface(Typeface.DEFAULT_BOLD);
         return t;
@@ -150,7 +159,7 @@ public class EffectsActivity extends Activity {
     private void tint(SeekBar s) {
         s.setProgressTintList(ColorStateList.valueOf(ACC));
         s.setThumbTintList(ColorStateList.valueOf(ACC2));
-        s.setProgressBackgroundTintList(ColorStateList.valueOf(0xFF444444));
+        s.setProgressBackgroundTintList(ColorStateList.valueOf(Ui.TRACK));
     }
 
     private LinearLayout page(ScrollView sv) {
@@ -213,14 +222,14 @@ public class EffectsActivity extends Activity {
             final int k = i;
             TextView t = text(names[i], 13, TXT, false);
             t.setPadding(dp(14), dp(8), dp(14), dp(8));
-            t.setBackground(round(i == selected ? ACC : 0xFF2B2B2B, 20));
+            t.setBackground(round(i == selected ? ACC : (Ui.LIGHT ? Ui.FIELD : 0xFF3A3A3A), 20));
             LinearLayout.LayoutParams p = lp(WC, WC, 0);
             p.rightMargin = dp(8);
             row.addView(t, p);
             t.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                     for (int j = 0; j < row.getChildCount(); j++) {
-                        row.getChildAt(j).setBackground(round(j == k ? ACC : 0xFF2B2B2B, 20));
+                        row.getChildAt(j).setBackground(round(j == k ? ACC : (Ui.LIGHT ? Ui.FIELD : 0xFF3A3A3A), 20));
                     }
                     cb.on(k);
                 }
@@ -364,7 +373,7 @@ public class EffectsActivity extends Activity {
 
         TextView reset = text("Tüm ayarları sıfırla", 14, TXT, true);
         reset.setGravity(Gravity.CENTER);
-        reset.setBackground(round(0xFF2B2B2B, 14));
+        reset.setBackground(round((Ui.LIGHT ? Ui.FIELD : 0xFF3A3A3A), 14));
         reset.setPadding(0, dp(12), 0, dp(12));
         LinearLayout.LayoutParams rp = lp(MP, WC, 0);
         rp.setMargins(dp(4), dp(4), dp(4), dp(8));

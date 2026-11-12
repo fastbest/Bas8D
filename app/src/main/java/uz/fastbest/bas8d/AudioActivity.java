@@ -72,12 +72,14 @@ public class AudioActivity extends Activity {
         @Override public void onServiceDisconnected(ComponentName n) { svc = null; }
     };
 
+    private int builtStamp;
+
     private int dp(float v) { return Ui.dp(this, v); }
 
     @Override protected void onCreate(Bundle s) {
         super.onCreate(s);
-        getWindow().setStatusBarColor(0xFF1C1C1C);
-        getWindow().setNavigationBarColor(0xFF161616);
+        Ui.apply(this);
+        builtStamp = Ui.stamp;
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         showQueue = Ui.prefs(this).getBoolean("showQueue", true);
         buildUi();
@@ -88,6 +90,8 @@ public class AudioActivity extends Activity {
 
     @Override protected void onResume() {
         super.onResume();
+        Ui.load(this);
+        if (Ui.stamp != builtStamp) { recreate(); return; }
         h.removeCallbacks(tick);
         h.post(tick);
     }
@@ -113,13 +117,13 @@ public class AudioActivity extends Activity {
     private void buildUi() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{0xFF1C1C1C, 0xFF2A2A2A, 0xFF161616}));
+        root.setBackground(Ui.GLASS ? Ui.pageBg() : Ui.LIGHT ? new android.graphics.drawable.ColorDrawable(Ui.BG)
+                : new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0xFF1C1C1C, 0xFF2A2A2A, 0xFF161616}));
 
         // üst çubuk
         LinearLayout bar = new LinearLayout(this);
         bar.setGravity(Gravity.CENTER_VERTICAL);
-        bar.setBackgroundColor(0xFF1C1C1C);
+        bar.setBackgroundColor(Ui.BAR);
         bar.setPadding(dp(20), dp(12), dp(4), dp(12));
         LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
@@ -145,7 +149,7 @@ public class AudioActivity extends Activity {
         root.addView(bar);
 
         View line = new View(this);
-        line.setBackgroundColor(0xFF0E0E0E);
+        line.setBackgroundColor(Ui.LIGHT || Ui.GLASS ? Ui.LINE : 0xFF0E0E0E);
         root.addView(line, new LinearLayout.LayoutParams(MP, dp(2)));
 
         search = new EditText(this);
@@ -153,7 +157,7 @@ public class AudioActivity extends Activity {
         search.setHintTextColor(SUB);
         search.setTextColor(TXT);
         search.setSingleLine(true);
-        search.setBackground(Ui.round(0xFF2B2B2B, dp(8)));
+        search.setBackground(Ui.round(Ui.ROW, dp(8)));
         search.setPadding(dp(14), dp(10), dp(14), dp(10));
         search.setVisibility(View.GONE);
         search.addTextChangedListener(new TextWatcher() {
@@ -180,7 +184,7 @@ public class AudioActivity extends Activity {
         cover = new ImageView(this);
         cover.setScaleType(ImageView.ScaleType.CENTER_CROP);
         cover.setClipToOutline(true);
-        cover.setBackground(Ui.round(0xFF2E2E2E, dp(8)));
+        cover.setBackground(Ui.round(Ui.ROW, dp(8)));
         FrameLayout.LayoutParams cp = new FrameLayout.LayoutParams(dp(280), dp(280), Gravity.CENTER);
         coverBox.addView(cover, cp);
         mid.addView(coverBox);
@@ -197,7 +201,7 @@ public class AudioActivity extends Activity {
         root.addView(times);
 
         seek = new SeekBar(this);
-        Ui.tint(seek, 0xFF4A4A4A);
+        Ui.tint(seek, Ui.TRACK);
         seek.setPadding(dp(4), dp(14), dp(4), dp(14));
         seek.setMax(1000);
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -310,7 +314,7 @@ public class AudioActivity extends Activity {
                 if (pos >= 0) queueView.setSelectionFromTop(pos, dp(80));
                 cover.setImageDrawable(null);
                 cover.setScaleType(ImageView.ScaleType.CENTER);
-                cover.setImageDrawable(Ui.icon(this, R.drawable.ic_note, 0xFF777777));
+                cover.setImageDrawable(Ui.icon(this, R.drawable.ic_note, Ui.DIM));
                 final String want = t.uri.toString();
                 if (t.video) Ui.thumb(cover, t);
                 else Ui.art(this, t, bm -> {
@@ -423,7 +427,7 @@ public class AudioActivity extends Activity {
             Track t = svc.list.get(i);
             boolean cur = i == svc.index;
             ((ImageView) row.getChildAt(0)).setImageDrawable(Ui.icon(AudioActivity.this,
-                    cur ? R.drawable.ic_bars : (t.video ? R.drawable.ic_movie : R.drawable.ic_note), cur ? 0xFFDDDDDD : 0xFF8A8A8A));
+                    cur ? R.drawable.ic_bars : (t.video ? R.drawable.ic_movie : R.drawable.ic_note), cur ? TXT : Ui.DIM));
             LinearLayout col = (LinearLayout) row.getChildAt(1);
             ((TextView) col.getChildAt(0)).setText(t.title);
             ((TextView) col.getChildAt(0)).setTextColor(TXT);
