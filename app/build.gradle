@@ -1,0 +1,28 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'uz.fastbest.bas8d'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'uz.fastbest.bas8d'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+    signingConfigs {
+        sabit {
+            storeFile file('imza.jks')
+            storePassword 'bas8dmuzik'
+            keyAlias 'bas8d'
+            keyPassword 'bas8dmuzik'
+        }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.sabit }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    lint { abortOnError false; checkReleaseBuilds false }
+}
