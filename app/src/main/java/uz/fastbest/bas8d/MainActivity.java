@@ -73,12 +73,12 @@ public class MainActivity extends Activity {
         Level(String title, Supplier<List<Row>> build) { this.title = title; this.build = build; }
     }
 
-    private static final String[] SECTION_NAMES = {"Görüntü", "Ses", "Göz at", "Listeler", "Diğerleri"};
+    private static final String[] SECTION_NAMES = {L.t("Görüntü"), L.t("Ses"), L.t("Göz at"), L.t("Listeler"), L.t("Diğerleri")};
     private static final int[] SECTION_ICONS = {R.drawable.ic_movie, R.drawable.ic_note, R.drawable.ic_folder,
             R.drawable.ic_queue, R.drawable.ic_more_horiz};
     private static final String[][] SUBTABS = {
-            {"KLASÖRLER", "TÜM VİDEOLAR"},
-            {"KLASÖRLER", "KAYITLAR", "SANATÇILAR", "ALBÜMLER"},
+            {L.t("KLASÖRLER"), L.t("TÜM VİDEOLAR")},
+            {L.t("KLASÖRLER"), L.t("KAYITLAR"), L.t("SANATÇILAR"), L.t("ALBÜMLER")},
             {}, {}, {}};
 
     private PlayerService svc;
@@ -97,6 +97,9 @@ public class MainActivity extends Activity {
     private LiquidTabs tabs;
     private CurvedNav nav;
     private ListView listView;
+    private androidx.recyclerview.widget.RecyclerView grid;
+    private GridAdapter gridAdapter;
+    private boolean gridMode;
     private RowAdapter adapter;
     private TextView emptyView;
     private ImageView fab;
@@ -264,6 +267,19 @@ public class MainActivity extends Activity {
         });
         content.addView(listView);
 
+        grid = new androidx.recyclerview.widget.RecyclerView(this);
+        androidx.recyclerview.widget.StaggeredGridLayoutManager lm =
+                new androidx.recyclerview.widget.StaggeredGridLayoutManager(2, androidx.recyclerview.widget.StaggeredGridLayoutManager.VERTICAL);
+        lm.setGapStrategy(androidx.recyclerview.widget.StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+        grid.setLayoutManager(lm);
+        grid.setItemAnimator(null);
+        grid.setClipToPadding(false);
+        grid.setPadding(dp(8), dp(8), dp(8), dp(130));
+        gridAdapter = new GridAdapter();
+        grid.setAdapter(gridAdapter);
+        grid.setVisibility(View.GONE);
+        content.addView(grid);
+
         emptyView = Ui.text(this, "", 15, SUB, false);
         emptyView.setGravity(Gravity.CENTER);
         emptyView.setPadding(dp(32), dp(32), dp(32), dp(32));
@@ -288,6 +304,7 @@ public class MainActivity extends Activity {
             if (k == section) {
                 if (!stack.isEmpty() || query != null) { stack.clear(); query = null; render(-1); }
                 listView.smoothScrollToPosition(0);
+                grid.smoothScrollToPosition(0);
                 return;
             }
             int dir = k > section ? 1 : -1;
@@ -364,6 +381,7 @@ public class MainActivity extends Activity {
         if (!u.equals(lastUri)) {
             lastUri = u;
             adapter.notifyDataSetChanged();
+            if (gridMode) gridAdapter.notifyDataSetChanged();
         }
     }
 
@@ -375,7 +393,7 @@ public class MainActivity extends Activity {
             topBar.setPadding(dp(4), 0, dp(4), 0);
             topBar.addView(Ui.btn(this, R.drawable.ic_back, TXT, 24, 12, v -> closeSearch()));
             final EditText e = new EditText(this);
-            e.setHint("Kitaplıkta ara");
+            e.setHint(L.t("Kitaplıkta ara"));
             e.setHintTextColor(SUB);
             e.setTextColor(TXT);
             e.setTextSize(18);
@@ -438,14 +456,14 @@ public class MainActivity extends Activity {
 
     private void topMenu(View anchor) {
         int sort = sp.getInt("sort", 0);
-        String[] labels = {sort == 0 ? "✓ Ada göre sırala" : "Ada göre sırala",
-                sort == 1 ? "✓ Tarihe göre sırala" : "Tarihe göre sırala",
-                "Kitaplığı yenile", "Dengeleyici", "Denetim ayarları", "Uyku zamanlayıcı", "Görünüm"};
+        String[] labels = {sort == 0 ? L.t("✓ Ada göre sırala") : L.t("Ada göre sırala"),
+                sort == 1 ? L.t("✓ Tarihe göre sırala") : L.t("Tarihe göre sırala"),
+                L.t("Kitaplığı yenile"), L.t("Dengeleyici"), L.t("Denetim ayarları"), L.t("Uyku zamanlayıcı"), L.t("Görünüm")};
         int[] icons = {R.drawable.ic_sort, R.drawable.ic_history, R.drawable.ic_refresh, R.drawable.ic_tune,
                 R.drawable.ic_settings, R.drawable.ic_timer, R.drawable.ic_aspect};
         Ui.menu(anchor, labels, icons, k -> {
             if (k == 0 || k == 1) { sp.edit().putInt("sort", k).apply(); render(); }
-            else if (k == 2) { loadLibrary(); Ui.toast(this, "Kitaplık yenileniyor…"); }
+            else if (k == 2) { loadLibrary(); Ui.toast(this, L.t("Kitaplık yenileniyor…")); }
             else if (k == 3) go(new Intent(this, EffectsActivity.class), false);
             else if (k == 4) Ui.controlSettings(this, false);
             else if (k == 5 && svc != null) Ui.sleepDialog(this, svc);
@@ -492,7 +510,12 @@ public class MainActivity extends Activity {
         buildTabs();
         if (nav.getSelected() != section) nav.select(section, true);
         rows = buildRows();
+        gridMode = query == null && stack.isEmpty() && section == 0 && subTab[0] == 1;
+        listView.setVisibility(gridMode ? View.GONE : View.VISIBLE);
+        grid.setVisibility(gridMode ? View.VISIBLE : View.GONE);
         adapter.notifyDataSetChanged();
+        gridAdapter.notifyDataSetChanged();
+        if (gridMode && dir != 0) grid.scrollToPosition(0);
         updateEmpty();
         animateContent(dir);
     }
@@ -500,7 +523,7 @@ public class MainActivity extends Activity {
     private void animateContent(int dir) {
         if (dir == 0) return;
         android.view.animation.Interpolator in = new android.view.animation.DecelerateInterpolator(2.2f);
-        for (View v : new View[]{listView, emptyView}) {
+        for (View v : new View[]{gridMode ? grid : listView, emptyView}) {
             v.animate().cancel();
             v.setTranslationX(dir * dp(80));
             v.setAlpha(0f);
@@ -526,13 +549,13 @@ public class MainActivity extends Activity {
         boolean empty = rows.isEmpty();
         emptyView.setVisibility(empty ? View.VISIBLE : View.GONE);
         if (empty) {
-            if (loading && query == null) emptyView.setText("Yükleniyor…");
-            else if (query != null) emptyView.setText(query.trim().isEmpty() ? "Aramak için yazın" : "Sonuç bulunamadı");
+            if (loading && query == null) emptyView.setText(L.t("Yükleniyor…"));
+            else if (query != null) emptyView.setText(query.trim().isEmpty() ? L.t("Aramak için yazın") : L.t("Sonuç bulunamadı"));
             else if (!granted(audioPerm()) || !granted(videoPerm()))
-                emptyView.setText("Müzik ve videoları göstermek için izin gerekli.\nİzin vermek için dokunun.");
+                emptyView.setText(L.t("Müzik ve videoları göstermek için izin gerekli.\nİzin vermek için dokunun."));
             else if (section == 3 && stack.isEmpty())
-                emptyView.setText("Henüz liste yok.\nOynatıcı menüsünden \"Listeyi kaydet\" veya bir kaydın menüsünden \"Listeye ekle\" ile liste oluşturun.");
-            else emptyView.setText("Burada hiç kayıt yok");
+                emptyView.setText(L.t("Henüz liste yok.\nOynatıcı menüsünden \"Listeyi kaydet\" veya bir kaydın menüsünden \"Listeye ekle\" ile liste oluşturun."));
+            else emptyView.setText(L.t("Burada hiç kayıt yok"));
         }
         int tracks = 0;
         for (Row r : rows) if (r.type == Row.TRACK) tracks++;
@@ -544,13 +567,13 @@ public class MainActivity extends Activity {
         if (!stack.isEmpty()) return stack.get(stack.size() - 1).build.get();
         switch (section) {
             case 0:
-                if (subTab[0] == 0) return groupRows(Lib.group(Lib.video, Lib.BY_FOLDER), R.drawable.ic_folder, "video");
-                return trackRows(sorted(Lib.video), sp.getInt("sort", 0) == 0, null);
+                if (subTab[0] == 0) return groupRows(Lib.group(Lib.video, Lib.BY_FOLDER), R.drawable.ic_folder, L.t("video"));
+                return trackRows(sorted(Lib.video), false, null);
             case 1:
-                if (subTab[1] == 0) return groupRows(Lib.group(Lib.audio, Lib.BY_FOLDER), R.drawable.ic_folder, "kayıt");
+                if (subTab[1] == 0) return groupRows(Lib.group(Lib.audio, Lib.BY_FOLDER), R.drawable.ic_folder, L.t("kayıt"));
                 if (subTab[1] == 1) return trackRows(sorted(Lib.audio), sp.getInt("sort", 0) == 0, null);
-                if (subTab[1] == 2) return groupRows(Lib.group(Lib.audio, Lib.BY_ARTIST), R.drawable.ic_person, "kayıt");
-                return groupRows(Lib.group(Lib.audio, Lib.BY_ALBUM), R.drawable.ic_album, "kayıt");
+                if (subTab[1] == 2) return groupRows(Lib.group(Lib.audio, Lib.BY_ARTIST), R.drawable.ic_person, L.t("kayıt"));
+                return groupRows(Lib.group(Lib.audio, Lib.BY_ALBUM), R.drawable.ic_album, L.t("kayıt"));
             case 2:
                 return browseRoots();
             case 3:
@@ -634,7 +657,7 @@ public class MainActivity extends Activity {
             row.type = Row.GROUP;
             row.icon = R.drawable.ic_storage;
             row.title = Lib.rootName(r);
-            row.sub = roots.get(r) + " medya dosyası";
+            row.sub = roots.get(r) + L.t(" medya dosyası");
             final String path = r;
             final String title = row.title;
             row.click = () -> push(title, () -> browse(path));
@@ -665,7 +688,7 @@ public class MainActivity extends Activity {
             r.type = Row.GROUP;
             r.icon = R.drawable.ic_folder;
             r.title = name;
-            r.sub = sub.get(name).size() + " medya dosyası";
+            r.sub = sub.get(name).size() + L.t(" medya dosyası");
             final String path = pre + name;
             final List<Track> items = sub.get(name);
             r.click = () -> push(name, () -> browse(path));
@@ -686,12 +709,12 @@ public class MainActivity extends Activity {
             r.type = Row.GROUP;
             r.icon = R.drawable.ic_queue;
             r.title = n;
-            r.sub = l.size() + " kayıt";
+            r.sub = l.size() + L.t(" kayıt");
             r.group = l;
             r.click = () -> push(n, () -> trackRows(Lib.playlist(this, n), false, n));
             r.more = () -> {
                 View anchor = listView;
-                Ui.menu(anchor, new String[]{"Çal", "Karışık çal", "Sıraya ekle", "Adını değiştir", "Sil"},
+                Ui.menu(anchor, new String[]{L.t("Çal"), L.t("Karışık çal"), L.t("Sıraya ekle"), L.t("Adını değiştir"), L.t("Sil")},
                         new int[]{R.drawable.ic_play, R.drawable.ic_shuffle, R.drawable.ic_queue_play,
                                 R.drawable.ic_tune, R.drawable.ic_delete}, k -> {
                             List<Track> cur = Lib.playlist(this, n);
@@ -700,9 +723,9 @@ public class MainActivity extends Activity {
                             else if (k == 2) enqueue(cur);
                             else if (k == 3) renamePlaylist(n);
                             else {
-                                Ui.dlg(this).setTitle("Silinsin mi?").setMessage("\"" + n + "\" listesi silinecek. Dosyalar silinmez.")
-                                        .setPositiveButton("Sil", (d, w) -> { Lib.deletePlaylist(this, n); render(); })
-                                        .setNegativeButton("İptal", null).show();
+                                Ui.dlg(this).setTitle(L.t("Silinsin mi?")).setMessage("\"" + n + L.t("\" listesi silinecek. Dosyalar silinmez."))
+                                        .setPositiveButton(L.t("Sil"), (d, w) -> { Lib.deletePlaylist(this, n); render(); })
+                                        .setNegativeButton(L.t("İptal"), null).show();
                             }
                         });
             };
@@ -718,35 +741,36 @@ public class MainActivity extends Activity {
         LinearLayout box = new LinearLayout(this);
         box.setPadding(dp(20), dp(8), dp(20), 0);
         box.addView(e, new LinearLayout.LayoutParams(MP, WC));
-        Ui.dlg(this).setTitle("Adını değiştir").setView(box).setPositiveButton("Kaydet", (d, w) -> {
+        Ui.dlg(this).setTitle(L.t("Adını değiştir")).setView(box).setPositiveButton(L.t("Kaydet"), (d, w) -> {
             String n = e.getText().toString().trim();
             if (n.isEmpty() || n.equals(old)) return;
             List<Track> l = Lib.playlist(this, old);
             Lib.deletePlaylist(this, old);
             Lib.savePlaylist(this, n, l);
             render();
-        }).setNegativeButton("İptal", null).show();
+        }).setNegativeButton(L.t("İptal"), null).show();
     }
 
     // Diğerleri
     private List<Row> moreRows() {
         List<Row> out = new ArrayList<>();
-        out.add(action("Görünüm", "Tema ve renk: " + Ui.THEMES[Math.max(0, Math.min(2, sp.getInt("tema", 2)))]
-                        + (Ui.GLASS ? " · Cam · " : " · ") + Ui.SWATCHES[Math.max(0, Math.min(Ui.SWATCHES.length - 1, sp.getInt("renk", 0)))][0],
+        out.add(action(L.t("Görünüm"), L.t("Tema ve renk: ") + Ui.THEMES[Math.max(0, Math.min(2, sp.getInt("tema", 2)))]
+                        + (Ui.GLASS ? L.t(" · Cam · ") : " · ") + Ui.SWATCHES[Math.max(0, Math.min(Ui.SWATCHES.length - 1, sp.getInt("renk", 0)))][0],
                 R.drawable.ic_aspect, () -> go(new Intent(this, AppearanceActivity.class), false)));
-        out.add(action("Geçmiş", "Son oynatılan kayıtlar", R.drawable.ic_history, this::openHistory));
-        out.add(action("Dengeleyici", "Bas, tiz ve ekolayzır", R.drawable.ic_tune,
+        out.add(action(L.t("Dil") + " / Language", L.name(L.code), R.drawable.ic_language, () -> Ui.languageDialog(this)));
+        out.add(action(L.t("Geçmiş"), L.t("Son oynatılan kayıtlar"), R.drawable.ic_history, this::openHistory));
+        out.add(action(L.t("Dengeleyici"), L.t("Bas, tiz ve ekolayzır"), R.drawable.ic_tune,
                 () -> go(new Intent(this, EffectsActivity.class).putExtra("tab", 0), false)));
-        out.add(action("8D ses ve efektler", "8D, ses yükseltme, surround, yankı, perde", R.drawable.ic_headset,
+        out.add(action(L.t("8D ses ve efektler"), L.t("8D, ses yükseltme, surround, yankı, perde"), R.drawable.ic_headset,
                 () -> go(new Intent(this, EffectsActivity.class).putExtra("tab", 1), false)));
-        out.add(action("Uyku zamanlayıcı", "Belirlenen süre sonunda oynatmayı durdur", R.drawable.ic_timer,
+        out.add(action(L.t("Uyku zamanlayıcı"), L.t("Belirlenen süre sonunda oynatmayı durdur"), R.drawable.ic_timer,
                 () -> { if (svc != null) Ui.sleepDialog(this, svc); }));
-        out.add(action("Denetim ayarları", "Atlama süresi, jestler, kulaklık", R.drawable.ic_settings,
+        out.add(action(L.t("Denetim ayarları"), L.t("Atlama süresi, jestler, kulaklık"), R.drawable.ic_settings,
                 () -> Ui.controlSettings(this, false)));
-        out.add(action("Kitaplığı yenile", Lib.audio.size() + " ses, " + Lib.video.size() + " video", R.drawable.ic_refresh,
-                () -> { loadLibrary(); Ui.toast(this, "Kitaplık yenileniyor…"); }));
-        out.add(action("Hakkında", "Myplayer", R.drawable.ic_info, () -> Ui.tips(this, "Myplayer",
-                "Kulaklık için müzik ve video oynatıcı.\n\nBas, tiz, ekolayzır, 8D ses, ses yükseltme, surround, yankı, hız ve perde ayarları hem müzikte hem videoda çalışır.")));
+        out.add(action(L.t("Kitaplığı yenile"), Lib.audio.size() + L.t(" ses, ") + Lib.video.size() + L.t(" video"), R.drawable.ic_refresh,
+                () -> { loadLibrary(); Ui.toast(this, L.t("Kitaplık yenileniyor…")); }));
+        out.add(action(L.t("Hakkında"), "Myplayer", R.drawable.ic_info, () -> Ui.tips(this, "Myplayer",
+                L.t("Kulaklık için müzik ve video oynatıcı.\n\nBas, tiz, ekolayzır, 8D ses, ses yükseltme, surround, yankı, hız ve perde ayarları hem müzikte hem videoda çalışır."))));
         return out;
     }
 
@@ -762,13 +786,13 @@ public class MainActivity extends Activity {
 
     private void openHistory() {
         query = null;
-        push("Geçmiş", () -> {
+        push(L.t("Geçmiş"), () -> {
             List<Track> hist = Lib.history(this);
             List<Row> out = new ArrayList<>();
-            if (!hist.isEmpty()) out.add(action("Geçmişi temizle", hist.size() + " kayıt", R.drawable.ic_delete, () ->
-                    Ui.dlg(this).setTitle("Geçmiş temizlensin mi?")
-                            .setPositiveButton("Temizle", (d, w) -> { Lib.clearHistory(this); render(); })
-                            .setNegativeButton("İptal", null).show()));
+            if (!hist.isEmpty()) out.add(action(L.t("Geçmişi temizle"), hist.size() + L.t(" kayıt"), R.drawable.ic_delete, () ->
+                    Ui.dlg(this).setTitle(L.t("Geçmiş temizlensin mi?"))
+                            .setPositiveButton(L.t("Temizle"), (d, w) -> { Lib.clearHistory(this); render(); })
+                            .setNegativeButton(L.t("İptal"), null).show()));
             out.addAll(trackRows(hist, false, null));
             return out;
         });
@@ -794,14 +818,14 @@ public class MainActivity extends Activity {
         if (svc == null) return;
         startService(new Intent(this, PlayerService.class));
         for (Track t : l) svc.addToQueue(t);
-        Ui.toast(this, l.size() + " kayıt sıraya eklendi");
+        Ui.toast(this, l.size() + L.t(" kayıt sıraya eklendi"));
     }
 
     private void shuffleAll() {
         List<Track> l = new ArrayList<>();
         for (Row r : rows) if (r.type == Row.TRACK) l.add(r.t);
         shuffle(l);
-        Ui.toast(this, "Karışık çalınıyor");
+        Ui.toast(this, L.t("Karışık çalınıyor"));
     }
 
     private void trackMenu(Track t, List<Track> list, int idx, String playlistName) {
@@ -822,7 +846,7 @@ public class MainActivity extends Activity {
             switch (a) {
                 case "Çal": play(list, idx); break;
                 case "Sonraki olarak çal":
-                    if (svc != null) { startService(new Intent(this, PlayerService.class)); svc.playNext(t); Ui.toast(this, "Sonraki olarak çalınacak"); }
+                    if (svc != null) { startService(new Intent(this, PlayerService.class)); svc.playNext(t); Ui.toast(this, L.t("Sonraki olarak çalınacak")); }
                     break;
                 case "Sıraya ekle": enqueue(Collections.singletonList(t)); break;
                 case "Listeye ekle": Ui.addToPlaylistDialog(this, Collections.singletonList(t)); break;
@@ -848,7 +872,7 @@ public class MainActivity extends Activity {
     }
 
     private void groupMenu(List<Track> items) {
-        Ui.menu(listView, new String[]{"Çal", "Karışık çal", "Sıraya ekle", "Listeye ekle"},
+        Ui.menu(listView, new String[]{L.t("Çal"), L.t("Karışık çal"), L.t("Sıraya ekle"), L.t("Listeye ekle")},
                 new int[]{R.drawable.ic_play, R.drawable.ic_shuffle, R.drawable.ic_queue, R.drawable.ic_playlist_add}, k -> {
                     List<Track> l = sorted(items);
                     if (k == 0) play(l, 0);
@@ -944,6 +968,103 @@ public class MainActivity extends Activity {
             Ui.ripple(more, true);
             row.addView(more);
             return row;
+        }
+    }
+
+    // ---------- Pinterest tarzı video ızgarası ----------
+
+    private class GridHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+        final FrameLayout box;
+        final ImageView img, more;
+        final TextView title, sub, dur, playing;
+
+        GridHolder(LinearLayout card, FrameLayout box, ImageView img, TextView dur, TextView playing,
+                   TextView title, TextView sub, ImageView more) {
+            super(card);
+            this.box = box; this.img = img; this.dur = dur; this.playing = playing;
+            this.title = title; this.sub = sub; this.more = more;
+        }
+    }
+
+    private class GridAdapter extends androidx.recyclerview.widget.RecyclerView.Adapter<GridHolder> {
+        @Override public int getItemCount() { return gridMode ? rows.size() : 0; }
+
+        @Override public GridHolder onCreateViewHolder(ViewGroup parent, int type) {
+            Context c = MainActivity.this;
+            LinearLayout card = new LinearLayout(c);
+            card.setOrientation(LinearLayout.VERTICAL);
+            card.setPadding(dp(5), dp(4), dp(5), dp(10));
+            androidx.recyclerview.widget.StaggeredGridLayoutManager.LayoutParams clp =
+                    new androidx.recyclerview.widget.StaggeredGridLayoutManager.LayoutParams(MP, WC);
+            card.setLayoutParams(clp);
+
+            FrameLayout box = new FrameLayout(c);
+            box.setBackground(Ui.round(Ui.ROW, dp(18)));
+            box.setClipToOutline(true);
+            ImageView img = new ImageView(c);
+            img.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            box.addView(img, new FrameLayout.LayoutParams(MP, MP));
+
+            TextView dur = Ui.text(c, "", 11, 0xFFFFFFFF, true);
+            dur.setPadding(dp(7), dp(2), dp(7), dp(2));
+            dur.setBackground(Ui.round(0x99000000, dp(10)));
+            FrameLayout.LayoutParams dp1 = new FrameLayout.LayoutParams(WC, WC, Gravity.BOTTOM | Gravity.END);
+            dp1.setMargins(0, 0, dp(8), dp(8));
+            box.addView(dur, dp1);
+
+            TextView playing = Ui.text(c, "▶", 11, 0xFFFFFFFF, true);
+            playing.setPadding(dp(8), dp(3), dp(8), dp(3));
+            playing.setBackground(Ui.round(ORANGE, dp(10)));
+            FrameLayout.LayoutParams pp = new FrameLayout.LayoutParams(WC, WC, Gravity.TOP | Gravity.START);
+            pp.setMargins(dp(8), dp(8), 0, 0);
+            box.addView(playing, pp);
+            card.addView(box, new LinearLayout.LayoutParams(MP, dp(160)));
+
+            LinearLayout row = new LinearLayout(c);
+            row.setPadding(dp(4), dp(6), 0, 0);
+            LinearLayout col = new LinearLayout(c);
+            col.setOrientation(LinearLayout.VERTICAL);
+            TextView title = Ui.text(c, "", 13.5f, TXT, true);
+            title.setMaxLines(2);
+            title.setEllipsize(TextUtils.TruncateAt.END);
+            TextView sub = Ui.text(c, "", 11.5f, SUB, false);
+            sub.setSingleLine(true);
+            sub.setEllipsize(TextUtils.TruncateAt.END);
+            sub.setPadding(0, dp(2), 0, 0);
+            col.addView(title);
+            col.addView(sub);
+            row.addView(col, new LinearLayout.LayoutParams(0, WC, 1));
+            ImageView more = Ui.img(c, R.drawable.ic_more_vert, Ui.ICON, 18, 4);
+            Ui.ripple(more, true);
+            row.addView(more);
+            card.addView(row);
+            return new GridHolder(card, box, img, dur, playing, title, sub, more);
+        }
+
+        @Override public void onBindViewHolder(GridHolder h, int pos) {
+            final Row r = rows.get(pos);
+            Track t = r.t;
+            int colW = (getResources().getDisplayMetrics().widthPixels - dp(16)) / 2 - dp(10);
+            float ratio = t.w > 0 && t.h > 0 ? t.h / (float) t.w : 0.5625f;
+            ratio = Math.max(0.56f, Math.min(1.78f, ratio));
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) h.box.getLayoutParams();
+            int hh = Math.round(colW * ratio);
+            if (lp.height != hh) { lp.height = hh; h.box.setLayoutParams(lp); }
+            Ui.thumb(h.img, t);
+            h.dur.setText(Ui.time(t.dur));
+            h.dur.setVisibility(t.dur > 0 ? View.VISIBLE : View.GONE);
+            boolean cur = svc != null && svc.current() != null && svc.current().uri.equals(t.uri);
+            h.playing.setVisibility(cur ? View.VISIBLE : View.GONE);
+            h.title.setText(t.title);
+            h.title.setTextColor(cur ? ORANGE : TXT);
+            h.sub.setText(Lib.folderName(t.folder));
+            h.itemView.setOnClickListener(v -> {
+                v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(70)
+                        .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(110).start()).start();
+                if (r.click != null) r.click.run();
+            });
+            h.itemView.setOnLongClickListener(v -> { if (r.more != null) r.more.run(); return true; });
+            h.more.setOnClickListener(v -> { if (r.more != null) r.more.run(); });
         }
     }
 }

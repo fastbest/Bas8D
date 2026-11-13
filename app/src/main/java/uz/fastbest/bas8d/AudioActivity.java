@@ -158,7 +158,7 @@ public class AudioActivity extends Activity {
         root.addView(line, new LinearLayout.LayoutParams(MP, dp(2)));
 
         search = new EditText(this);
-        search.setHint("Çalma sırasında ara");
+        search.setHint(L.t("Çalma sırasında ara"));
         search.setHintTextColor(SUB);
         search.setTextColor(TXT);
         search.setSingleLine(true);
@@ -229,7 +229,7 @@ public class AudioActivity extends Activity {
             if (svc == null) return;
             svc.shuffle = !svc.shuffle;
             svc.save();
-            Ui.toast(this, svc.shuffle ? "Karışık çalma açık" : "Karışık çalma kapalı");
+            Ui.toast(this, svc.shuffle ? L.t("Karışık çalma açık") : L.t("Karışık çalma kapalı"));
             refresh();
         });
         ImageView bPrev = Ui.btn(this, R.drawable.ic_prev, TXT, 38, 10, v -> { if (svc != null) svc.prev(); });
@@ -243,7 +243,7 @@ public class AudioActivity extends Activity {
             if (svc == null) return;
             svc.repeat = (svc.repeat + 1) % 3;
             svc.save();
-            Ui.toast(this, svc.repeat == 0 ? "Yineleme kapalı" : svc.repeat == 1 ? "Tümünü yinele" : "Bu kaydı yinele");
+            Ui.toast(this, svc.repeat == 0 ? L.t("Yineleme kapalı") : svc.repeat == 1 ? L.t("Tümünü yinele") : L.t("Bu kaydı yinele"));
             refresh();
         });
         ctl.setPadding(dp(8), dp(8), dp(8), dp(26));
@@ -304,7 +304,7 @@ public class AudioActivity extends Activity {
         if (svc == null) return;
         Track t = svc.current();
         if (t == null) {
-            title.setText("Çalan kayıt yok");
+            title.setText(L.t("Çalan kayıt yok"));
             artist.setText("");
             bPlay.setImageDrawable(Ui.icon(this, R.drawable.ic_play, TXT));
             rebuildQueue();
@@ -350,9 +350,9 @@ public class AudioActivity extends Activity {
 
     private void menu(View anchor) {
         if (svc == null) return;
-        String[] labels = {"Uyku zamanlayıcı", "Oynatma hızı", "Sıçranacak zaman", "Dengeleyici", "Yer imleri",
-                "A-B yineleme", "Listeyi kaydet", "Kayıt bilgilerini paylaş", "Denetim ayarları",
-                "Ses oynatıcı ipuçları", "Liste ipuçları"};
+        String[] labels = {L.t("Uyku zamanlayıcı"), L.t("Oynatma hızı"), L.t("Sıçranacak zaman"), L.t("Dengeleyici"), L.t("Yer imleri"),
+                L.t("A-B yineleme"), L.t("Listeyi kaydet"), L.t("Kayıt bilgilerini paylaş"), L.t("Denetim ayarları"),
+                L.t("Ses oynatıcı ipuçları"), L.t("Liste ipuçları")};
         int[] icons = {R.drawable.ic_timer, R.drawable.ic_speed, R.drawable.ic_jump, R.drawable.ic_tune,
                 R.drawable.ic_bookmark, R.drawable.ic_ab, R.drawable.ic_playlist_add, R.drawable.ic_share,
                 R.drawable.ic_settings, R.drawable.ic_tips, R.drawable.ic_tips};
@@ -368,8 +368,8 @@ public class AudioActivity extends Activity {
                 case 6: Ui.savePlaylistDialog(this, svc.list); break;
                 case 7: Ui.shareInfo(this, svc.current()); break;
                 case 8: Ui.controlSettings(this, false); break;
-                case 9: Ui.tips(this, "Ses oynatıcı ipuçları", Ui.AUDIO_TIPS); break;
-                default: Ui.tips(this, "Liste ipuçları", Ui.LIST_TIPS); break;
+                case 9: Ui.tips(this, L.t("Ses oynatıcı ipuçları"), Ui.AUDIO_TIPS); break;
+                default: Ui.tips(this, L.t("Liste ipuçları"), Ui.LIST_TIPS); break;
             }
         });
     }
@@ -377,8 +377,8 @@ public class AudioActivity extends Activity {
     private void itemMenu(int i) {
         if (svc == null || i < 0 || i >= svc.list.size()) return;
         final Track t = svc.list.get(i);
-        Ui.menu(queueView, new String[]{"Çal", "Sonraki olarak çal", "Yukarı taşı", "Aşağı taşı", "Listeye ekle",
-                        "Bilgiler", "Listeden kaldır"},
+        Ui.menu(queueView, new String[]{L.t("Çal"), L.t("Sonraki olarak çal"), L.t("Yukarı taşı"), L.t("Aşağı taşı"), L.t("Listeye ekle"),
+                        L.t("Bilgiler"), L.t("Listeden kaldır")},
                 new int[]{R.drawable.ic_play, R.drawable.ic_queue_play, R.drawable.ic_sort, R.drawable.ic_sort,
                         R.drawable.ic_playlist_add, R.drawable.ic_info, R.drawable.ic_delete}, k -> {
                     if (svc == null || i >= svc.list.size()) return;

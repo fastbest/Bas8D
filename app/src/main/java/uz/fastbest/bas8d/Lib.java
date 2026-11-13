@@ -49,7 +49,7 @@ public class Lib {
         List<Track> out = new ArrayList<>();
         Uri base = isVideo ? MediaStore.Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         String[] cols = isVideo
-                ? new String[]{"_id", "_display_name", "title", "duration", "_data", "_size", "mime_type", "date_added", "width", "height", "bucket_display_name"}
+                ? new String[]{"_id", "_display_name", "title", "duration", "_data", "_size", "mime_type", "date_added", "width", "height", "bucket_display_name", "orientation"}
                 : new String[]{"_id", "_display_name", "title", "duration", "_data", "_size", "mime_type", "date_added", "artist", "album"};
         Cursor cur = null;
         try {
@@ -73,7 +73,7 @@ public class Lib {
                     int dot = title.lastIndexOf('.');
                     if (isVideo && dot > 0) title = title.substring(0, dot);
                 }
-                t.title = title.isEmpty() ? "Adsız" : title;
+                t.title = title.isEmpty() ? L.t("Adsız") : title;
                 t.dur = getLong(cur, "duration");
                 t.path = getStr(cur, "_data");
                 t.size = getLong(cur, "_size");
@@ -82,12 +82,14 @@ public class Lib {
                 if (isVideo) {
                     t.w = (int) getLong(cur, "width");
                     t.h = (int) getLong(cur, "height");
+                    long rot = getLong(cur, "orientation");
+                    if (rot == 90 || rot == 270) { int tmp = t.w; t.w = t.h; t.h = tmp; }
                     t.artist = "";
                 } else {
                     String ar = getStr(cur, "artist");
-                    t.artist = ar.isEmpty() || ar.equals("<unknown>") ? "Bilinmeyen sanatçı" : ar;
+                    t.artist = ar.isEmpty() || ar.equals("<unknown>") ? L.t("Bilinmeyen sanatçı") : ar;
                     String al = getStr(cur, "album");
-                    t.album = al.isEmpty() || al.equals("<unknown>") ? "Bilinmeyen albüm" : al;
+                    t.album = al.isEmpty() || al.equals("<unknown>") ? L.t("Bilinmeyen albüm") : al;
                 }
                 String dir = parent(t.path);
                 if (!dir.isEmpty()) t.folder = dir;
@@ -154,7 +156,7 @@ public class Lib {
 
     public static String folderName(String dir) {
         String n = baseName(dir);
-        if (n.equals("0") || n.isEmpty()) return "Dahili hafıza";
+        if (n.equals("0") || n.isEmpty()) return L.t("Dahili hafıza");
         return n;
     }
 
@@ -166,7 +168,7 @@ public class Lib {
         Collections.sort(l, (x, y) -> Long.compare(y.date, x.date));
     }
 
-    /** "Göz at" için depolama kökü (ör. /storage/emulated/0). */
+    /** L.t("Göz at") için depolama kökü (ör. /storage/emulated/0). */
     public static String storageRoot(String path) {
         String[] p = path.split("/");
         if (path.startsWith("/storage/emulated/") && p.length > 4) return "/" + p[1] + "/" + p[2] + "/" + p[3];
@@ -176,8 +178,8 @@ public class Lib {
     }
 
     public static String rootName(String root) {
-        if (root.startsWith("/storage/emulated")) return "Dahili hafıza";
-        if (root.startsWith("/storage/")) return "SD kart (" + baseName(root) + ")";
+        if (root.startsWith("/storage/emulated")) return L.t("Dahili hafıza");
+        if (root.startsWith("/storage/")) return L.t("SD kart (") + baseName(root) + ")";
         return root;
     }
 

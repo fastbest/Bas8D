@@ -1,0 +1,259 @@
+Tampilan
+Tema
+Gaya
+Datar
+Kaca
+Warna
+Ukuran teks
+Pratinjau
+FOLDER
+LAGU
+24 lagu
+Contoh lagu
+3:45 · Artis
+Cari di antrean
+Acak aktif
+Acak nonaktif
+Ulangi nonaktif
+Ulangi semua
+Ulangi lagu ini
+Tidak ada yang diputar
+Pengatur waktu tidur
+Kecepatan putar
+Lompat ke waktu
+Ekualiser
+Penanda
+Ulangi A-B
+Simpan daftar
+Bagikan info lagu
+Pengaturan kontrol
+Tips pemutar audio
+Tips daftar putar
+Putar
+Putar berikutnya
+Pindah ke atas
+Pindah ke bawah
+Tambah ke daftar
+Info
+Hapus dari daftar
+EKUALISER
+8D & EFEK
+Penguat bass
+Penguat treble
+Headphone
+Rock
+Pop
+Vokal
+Dance
+Klasik
+Bass & Treble
+Atur cepat: perkuat bass dan treble dengan satu penggeser.
+Bass
+Treble
+Ekualiser
+Pilih preset atau atur pita satu per satu.
+Ponsel ini tidak mendukung ekualiser.
+Suara 8D
+Suara berputar di sekitar kepala Anda. Dengarkan dengan headphone.
+8D aktif
+Waktu putaran
+dtk
+Penguat volume
+Melebihi volume maksimum ponsel. Pada tingkat tinggi suara bisa pecah; mendengar sangat keras dalam waktu lama merusak pendengaran.
+Penguatan
+Ponsel ini tidak mendukung penguat volume.
+Surround & Gema
+Surround (lebar 3D)
+Gema
+Mati
+Ruang kecil
+Ruang sedang
+Ruang besar
+Aula
+Aula besar
+Metalik
+Keseimbangan kiri / kanan
+Tengah
+Kiri %
+Kanan %
+Kecepatan & Nada
+Mendengarkan lebih lambat (slowed) atau lebih cepat (nightcore).
+Kecepatan
+Nada
+Atur ulang semua pengaturan
+Pengaturan diatur ulang
+Tanpa judul
+Artis tidak dikenal
+Album tidak dikenal
+Penyimpanan internal
+Jelajahi
+Kartu SD (
+Video
+Audio
+Daftar putar
+Lainnya
+SEMUA VIDEO
+ARTIS
+ALBUM
+Cari di pustaka
+✓ Urutkan menurut nama
+Urutkan menurut nama
+✓ Urutkan menurut tanggal
+Urutkan menurut tanggal
+Segarkan pustaka
+Menyegarkan pustaka…
+Memuat…
+Ketik untuk mencari
+Tidak ada hasil
+Izin diperlukan untuk menampilkan musik dan video.\nKetuk untuk memberi izin.
+Belum ada daftar putar.\nBuat dengan "Simpan daftar" di menu pemutar atau "Tambah ke daftar" di menu lagu.
+Tidak ada apa-apa di sini
+video
+lagu
+file media
+Putar acak
+Tambah ke antrean
+Ganti nama
+Hapus
+Hapus?
+" akan dihapus. File tidak dihapus.
+Batal
+Simpan
+Tema dan warna:
+· Kaca ·
+Riwayat
+Baru diputar
+Bass, treble, dan ekualiser
+Suara 8D & efek
+8D, penguat volume, surround, gema, nada
+Hentikan pemutaran setelah waktu tertentu
+Waktu lompat, gestur, headphone
+audio,
+Tentang
+Pemutar musik dan video untuk headphone.\n\nBass, treble, ekualiser, suara 8D, penguat volume, surround, gema, kecepatan, dan nada berfungsi untuk musik dan video.
+Hapus riwayat
+Hapus riwayat?
+Hapus
+lagu ditambahkan ke antrean
+Memutar acak
+Putar sebagai audio
+Bagikan
+Akan diputar berikutnya
+Pemutaran
+Sebelumnya
+Jeda
+Berikutnya
+Tutup
+Oranye
+Toska
+Samudra
+Lavender
+Mawar
+Koral
+Zamrud
+Amber
+Grafit
+Sistem
+Terang
+Gelap
+Kecil
+Normal
+Besar
+Sangat besar
+5 menit
+10 menit
+15 menit
+20 menit
+30 menit
+45 menit
+1 jam
+1,5 jam
+Saat lagu ini selesai
+tersisa)
+(saat lagu selesai)
+Akan berhenti saat lagu ini selesai
+Pengatur waktu tidur dimatikan
+— lalu pemutaran berhenti
+OK
+Atur ulang
+Lagu belum siap
+Lompat ke waktu (maks.
+Buka
+Penanda
+Tambah posisi saat ini
+Penanda ditambahkan:
+Belum ada penanda.\nGunakan "Tambah posisi saat ini" untuk menyimpan posisi Anda. Ketuk penanda untuk menuju ke sana, tekan lama untuk menghapus.
+Penanda dihapus
+Titik A:
+. Pilih lagi untuk titik B.
+Ulangi A-B:
+Ulangi A-B nonaktif
+Daftar kosong
+Nama daftar
+Daftar
+" disimpan (
+lagu)
++ Daftar baru
+ditambahkan ke daftar
+Nama:
+Artis:
+Album:
+Durasi:
+Resolusi:
+Ukuran:
+Format:
+Folder:
+Lokasi:
+Info video
+Info lagu
+Sedang menonton:
+Sedang mendengarkan:
+Bagikan file
+Jeda saat headphone dicabut
+Lanjutkan video dari posisi terakhir
+Geser untuk volume dan kecerahan
+Ketuk dua kali untuk maju / mundur
+Tampilkan sisa waktu di pemutar video
+Audio tetap diputar setelah keluar video
+Waktu lompat maju / mundur
+Mengerti
+• Tombol daftar di kanan atas menampilkan / menyembunyikan antrean.
+• Gunakan kaca pembesar untuk mencari di antrean.
+• Menekan Sebelumnya di awal lagu pindah ke lagu sebelumnya; setelah 4 detik kembali ke awal lagu.
+• Tombol ulangi: nonaktif → semua → satu.
+• Tombol acak memutar dalam urutan acak.
+• Atur bass, treble, ekualiser, suara 8D, dan penguat volume dari menu Ekualiser.
+• Ulangi A-B: pilih sekali (A), lalu lagi (B); bagian di antaranya diulang. Pilihan ketiga mematikannya.
+• Ketuk lagu: lagu diputar.
+• Tiga titik pada lagu: hapus dari daftar, pindah ke atas / bawah, putar berikutnya, tambah ke daftar lain.
+• Gunakan "Simpan daftar" untuk memberi nama dan menyimpan antrean; temukan di tab "Daftar putar".
+• Di layar utama, gunakan "Tambah ke antrean" dari tiga titik lagu.
+• Ketuk sekali: tampilkan / sembunyikan kontrol.
+• Ketuk dua kali: kanan maju, kiri mundur (waktu diubah di Pengaturan kontrol).
+• Geser atas-bawah di kiri: kecerahan. Di kanan: volume.
+• Geser horizontal: maju / mundur di video.
+• Kunci: memblokir sentuhan; untuk membuka, ketuk layar dan tahan tombol kunci 3 detik.
+• Putar sebagai audio: mematikan gambar dan hanya memutar suara.
+• Pemutar pop-up: video diputar di jendela kecil di atas aplikasi lain.
+Paling pas
+Penuhi layar
+Regangkan
+Ukuran asli
+Kecerahan %
+Volume %
+Tahan untuk membuka kunci\n3
+Tahan 3 detik untuk membuka kunci
+Kunci dibuka
+Tahan untuk membuka kunci
+Layar terkunci. Tahan tombol kunci 3 detik untuk membuka.
+Kunci
+Pemutar pop-up
+Mode ulang
+Tips pemutar video
+Tanpa ulang
+Ulangi ini
+Ponsel ini tidak mendukung jendela pop-up
+Jendela pop-up tidak dapat dibuka. Izinkan "gambar dalam gambar" untuk aplikasi ini di pengaturan ponsel.
+Video
+Bahasa
+Bahasa sistem

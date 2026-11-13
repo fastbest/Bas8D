@@ -1,0 +1,259 @@
+Apparence
+Thème
+Style
+Plat
+Verre
+Couleur
+Taille du texte
+Aperçu
+DOSSIERS
+TITRES
+24 titres
+Titre d'exemple
+3:45 · Artiste
+Rechercher dans la file
+Lecture aléatoire activée
+Lecture aléatoire désactivée
+Répétition désactivée
+Tout répéter
+Répéter ce titre
+Aucune lecture en cours
+Minuterie de veille
+Vitesse de lecture
+Aller à un moment
+Égaliseur
+Signets
+Répétition A-B
+Enregistrer la liste
+Partager les infos du titre
+Réglages des commandes
+Conseils du lecteur audio
+Conseils sur les listes
+Lire
+Lire ensuite
+Monter
+Descendre
+Ajouter à une liste
+Infos
+Retirer de la liste
+ÉGALISEUR
+8D ET EFFETS
+Basses renforcées
+Aigus renforcés
+Casque
+Rock
+Pop
+Voix
+Dance
+Classique
+Basses et aigus
+Réglage rapide : renforcez basses et aigus avec un seul curseur.
+Basses
+Aigus (treble)
+Égaliseur
+Choisissez un préréglage ou réglez les bandes une par une.
+Ce téléphone ne prend pas en charge l'égaliseur.
+Son 8D
+Le son tourne autour de votre tête. Écoutez avec un casque.
+8D activé
+Durée d'un tour
+s
+Amplification du volume
+Dépasse le volume maximal du téléphone. À fort niveau le son peut saturer ; écouter très fort longtemps abîme l'audition.
+Amplification
+Ce téléphone ne prend pas en charge l'amplification.
+Surround et réverbération
+Surround (largeur 3D)
+Réverbération
+Désactivé
+Petite pièce
+Pièce moyenne
+Grande pièce
+Salle
+Grande salle
+Métallique
+Balance gauche / droite
+Centre
+Gauche %
+Droite %
+Vitesse et hauteur
+Écoute ralentie (slowed) ou accélérée (nightcore).
+Vitesse
+Hauteur
+Réinitialiser tous les réglages
+Réglages réinitialisés
+Sans titre
+Artiste inconnu
+Album inconnu
+Mémoire interne
+Parcourir
+Carte SD (
+Vidéo
+Audio
+Listes
+Plus
+TOUTES LES VIDÉOS
+ARTISTES
+ALBUMS
+Rechercher dans la bibliothèque
+✓ Trier par nom
+Trier par nom
+✓ Trier par date
+Trier par date
+Actualiser la bibliothèque
+Actualisation de la bibliothèque…
+Chargement…
+Tapez pour rechercher
+Aucun résultat
+Une autorisation est nécessaire pour afficher musique et vidéos.\nTouchez pour l'accorder.
+Aucune liste pour l'instant.\nCréez-en une avec « Enregistrer la liste » dans le menu du lecteur ou « Ajouter à une liste » dans le menu d'un titre.
+Rien ici
+vidéos
+titres
+fichiers multimédias
+Lecture aléatoire
+Ajouter à la file
+Renommer
+Supprimer
+Supprimer ?
+" sera supprimée. Les fichiers ne sont pas supprimés.
+Annuler
+Enregistrer
+Thème et couleur :
+· Verre ·
+Historique
+Lus récemment
+Basses, aigus et égaliseur
+Son 8D et effets
+8D, amplification, surround, réverbération, hauteur
+Arrêter la lecture après un délai
+Durée de saut, gestes, casque
+audios,
+À propos
+Lecteur de musique et de vidéo pour casque.\n\nBasses, aigus, égaliseur, son 8D, amplification, surround, réverbération, vitesse et hauteur fonctionnent pour la musique et la vidéo.
+Effacer l'historique
+Effacer l'historique ?
+Effacer
+titres ajoutés à la file
+Lecture aléatoire
+Lire en audio
+Partager
+Sera lu ensuite
+Lecture
+Précédent
+Pause
+Suivant
+Fermer
+Orange
+Turquoise
+Océan
+Lavande
+Rose
+Corail
+Émeraude
+Ambre
+Graphite
+Système
+Clair
+Sombre
+Petite
+Normale
+Grande
+Très grande
+5 minutes
+10 minutes
+15 minutes
+20 minutes
+30 minutes
+45 minutes
+1 heure
+1,5 heure
+À la fin de ce titre
+restantes)
+(à la fin du titre)
+S'arrêtera à la fin de ce titre
+Minuterie désactivée
+— puis la lecture s'arrêtera
+OK
+Réinitialiser
+Le titre n'est pas encore prêt
+Aller à un moment (max.
+Aller
+Signet
+Ajouter la position actuelle
+Signet ajouté :
+Aucun signet pour l'instant.\nUtilisez « Ajouter la position actuelle » pour enregistrer votre position. Touchez un signet pour y aller, appui long pour le supprimer.
+Signet supprimé
+Point A :
+. Sélectionnez à nouveau pour le point B.
+Répétition A-B :
+Répétition A-B désactivée
+La liste est vide
+Nom de la liste
+Liste
+" enregistrée (
+titres)
++ Nouvelle liste
+ajouté à la liste
+Nom :
+Artiste :
+Album :
+Durée :
+Résolution :
+Taille :
+Format :
+Dossier :
+Emplacement :
+Infos de la vidéo
+Infos du titre
+Je regarde :
+J'écoute :
+Partager le fichier
+Pause quand le casque est débranché
+Reprendre les vidéos là où vous étiez
+Glisser pour volume et luminosité
+Double appui pour avancer / reculer
+Afficher le temps restant dans la vidéo
+Continuer le son après la vidéo
+Durée d'avance / recul
+Compris
+• Le bouton liste en haut à droite affiche / masque la file.
+• La loupe permet de rechercher dans la file.
+• « Précédent » au début d'un titre passe au titre précédent ; après 4 secondes il revient au début du titre.
+• Bouton répétition : désactivé → tout → un seul.
+• Le bouton aléatoire lit dans un ordre au hasard.
+• Réglez basses, aigus, égaliseur, son 8D et amplification depuis le menu Égaliseur.
+• Répétition A-B : sélectionnez une fois (A), puis encore (B) ; le passage entre les deux se répète. Une troisième sélection l'arrête.
+• Touchez un titre : il est lu.
+• Les trois points d'un titre : retirer de la liste, monter / descendre, lire ensuite, ajouter à une autre liste.
+• « Enregistrer la liste » nomme et garde la file actuelle ; vous la trouverez dans l'onglet « Listes ».
+• Sur l'écran principal, utilisez « Ajouter à la file » depuis les trois points d'un titre.
+• Un appui : affiche / masque les commandes.
+• Double appui : à droite avance, à gauche recule (durée modifiable dans Réglages des commandes).
+• Glisser haut-bas à gauche : luminosité. À droite : volume.
+• Glisser horizontalement : avancer / reculer dans la vidéo.
+• Verrouiller : bloque les touches ; pour déverrouiller, touchez l'écran et maintenez le cadenas 3 secondes.
+• Lire en audio : coupe l'image et lit seulement le son.
+• Lecteur flottant : la vidéo est lue dans une petite fenêtre au-dessus des autres applis.
+Meilleur ajustement
+Remplir l'écran
+Étirer
+Taille d'origine
+Luminosité %
+Volume %
+Maintenez pour déverrouiller\n3
+Maintenez 3 secondes pour déverrouiller
+Déverrouillé
+Maintenez pour déverrouiller
+Écran verrouillé. Maintenez le cadenas 3 secondes pour déverrouiller.
+Verrouiller
+Lecteur flottant
+Mode de répétition
+Conseils du lecteur vidéo
+Pas de répétition
+Répéter ceci
+Ce téléphone ne prend pas en charge les fenêtres flottantes
+Impossible d'ouvrir la fenêtre flottante. Autorisez « image dans l'image » pour cette appli dans les réglages.
+Vidéo
+Langue
+Langue du système

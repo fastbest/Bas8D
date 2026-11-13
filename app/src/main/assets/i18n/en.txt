@@ -1,0 +1,259 @@
+Appearance
+Theme
+Style
+Flat
+Glass
+Color
+Text size
+Preview
+FOLDERS
+TRACKS
+24 tracks
+Sample track
+3:45 · Artist
+Search in queue
+Shuffle on
+Shuffle off
+Repeat off
+Repeat all
+Repeat this track
+Nothing playing
+Sleep timer
+Playback speed
+Jump to time
+Equalizer
+Bookmarks
+A-B repeat
+Save playlist
+Share track info
+Control settings
+Audio player tips
+Playlist tips
+Play
+Play next
+Move up
+Move down
+Add to playlist
+Info
+Remove from list
+EQUALIZER
+8D & EFFECTS
+Bass boost
+Treble boost
+Headphones
+Rock
+Pop
+Vocal
+Dance
+Classical
+Bass & Treble
+Quick setting: boost bass and treble with a single slider.
+Bass
+Treble
+Equalizer
+Pick a preset or adjust the bands one by one.
+This phone does not support the equalizer.
+8D Audio
+The sound rotates around your head. Listen with headphones.
+8D on
+Rotation time
+s
+Volume boost
+Goes above your phone's maximum volume. High settings may distort the sound; listening very loud for a long time can damage your hearing.
+Boost
+This phone does not support volume boost.
+Surround & Reverb
+Surround (3D width)
+Reverb
+Off
+Small room
+Medium room
+Large room
+Hall
+Large hall
+Metallic
+Left / Right balance
+Center
+Left %
+Right %
+Speed & Pitch
+Slowed or sped-up (nightcore) listening.
+Speed
+Pitch
+Reset all settings
+Settings reset
+Untitled
+Unknown artist
+Unknown album
+Internal storage
+Browse
+SD card (
+Video
+Audio
+Playlists
+More
+ALL VIDEOS
+ARTISTS
+ALBUMS
+Search library
+✓ Sort by name
+Sort by name
+✓ Sort by date
+Sort by date
+Refresh library
+Refreshing library…
+Loading…
+Type to search
+No results
+Permission is needed to show music and videos.\nTap to grant permission.
+No playlists yet.\nCreate one with "Save playlist" in the player menu or "Add to playlist" in a track's menu.
+Nothing here
+videos
+tracks
+media files
+Shuffle play
+Add to queue
+Rename
+Delete
+Delete?
+" playlist will be deleted. Files are not deleted.
+Cancel
+Save
+Theme and color:
+· Glass ·
+History
+Recently played
+Bass, treble and equalizer
+8D audio & effects
+8D, volume boost, surround, reverb, pitch
+Stop playback after a set time
+Skip time, gestures, headphones
+audio,
+About
+Music and video player for headphones.\n\nBass, treble, equalizer, 8D audio, volume boost, surround, reverb, speed and pitch work for both music and video.
+Clear history
+Clear history?
+Clear
+tracks added to queue
+Shuffling
+Play as audio
+Share
+Will play next
+Playback
+Previous
+Pause
+Next
+Close
+Orange
+Teal
+Ocean
+Lavender
+Rose
+Coral
+Emerald
+Amber
+Graphite
+System
+Light
+Dark
+Small
+Normal
+Large
+Extra large
+5 minutes
+10 minutes
+15 minutes
+20 minutes
+30 minutes
+45 minutes
+1 hour
+1.5 hours
+When this track ends
+left)
+(when track ends)
+Will stop when this track ends
+Sleep timer off
+from now playback stops
+OK
+Reset
+Track is not ready yet
+Jump to time (max
+Go
+Bookmark
+Add current position
+Bookmark added:
+No bookmarks yet.\nUse "Add current position" to save where you are. Tap a bookmark to jump there, long-press to delete it.
+Bookmark deleted
+Point A:
+. Select again for point B.
+A-B repeat:
+A-B repeat off
+List is empty
+Playlist name
+Playlist
+" saved (
+tracks)
++ New playlist
+added to playlist
+Name:
+Artist:
+Album:
+Duration:
+Resolution:
+Size:
+Format:
+Folder:
+Location:
+Video info
+Track info
+Now watching:
+Now listening:
+Share file
+Pause when headphones are unplugged
+Resume videos where you left off
+Swipe for volume and brightness
+Double-tap to seek forward / back
+Show remaining time in video player
+Keep audio playing after leaving video
+Forward / back skip time
+Got it
+• The list button at the top right shows / hides the queue.
+• Use the magnifier to search in the queue.
+• Pressing Previous near the start goes to the previous track; after 4 seconds it goes to the start of the track.
+• Repeat button: off → all → one.
+• The shuffle button plays in random order.
+• Adjust bass, treble, equalizer, 8D audio and volume boost from the Equalizer menu.
+• A-B repeat: select once (A), then again (B); the part in between repeats. A third selection turns it off.
+• Tap a track: it plays.
+• Three dots on a track: remove from list, move up / down, play next, add to another playlist.
+• Use "Save playlist" to name and keep the current queue; you'll find it in the "Playlists" tab.
+• On the home screen, use "Add to queue" from a track's three dots to add tracks.
+• Single tap: shows / hides the controls.
+• Double tap: right side seeks forward, left side back (time can be changed in Control settings).
+• Swipe up-down on the left: brightness. On the right: volume.
+• Swipe horizontally: seek forward / back in the video.
+• Lock: blocks touches; to unlock, tap the screen and hold the lock button for 3 seconds.
+• Play as audio: turns off the picture and plays only the sound.
+• Pop-up player: the video plays in a small window over other apps.
+Best fit
+Fill screen
+Stretch
+Original size
+Brightness %
+Volume %
+Hold to unlock\n3
+Hold for 3 seconds to unlock
+Unlocked
+Hold to unlock
+Screen locked. Hold the lock button for 3 seconds to unlock.
+Lock
+Pop-up player
+Repeat mode
+Video player tips
+No repeat
+Repeat this
+This phone does not support pop-up windows
+Could not open the pop-up window. Allow "picture-in-picture" for this app in phone settings.
+Video
+Language
+System language

@@ -1,0 +1,259 @@
+Görünüm
+Tema
+Stil
+Düz
+Cam
+Renk
+Yazı boyutu
+Ön izleme
+KLASÖRLER
+KAYITLAR
+24 kayıt
+Örnek kayıt
+3:45 · Sanatçı
+Çalma sırasında ara
+Karışık çalma açık
+Karışık çalma kapalı
+Yineleme kapalı
+Tümünü yinele
+Bu kaydı yinele
+Çalan kayıt yok
+Uyku zamanlayıcı
+Oynatma hızı
+Sıçranacak zaman
+Dengeleyici
+Yer imleri
+A-B yineleme
+Listeyi kaydet
+Kayıt bilgilerini paylaş
+Denetim ayarları
+Ses oynatıcı ipuçları
+Liste ipuçları
+Çal
+Sonraki olarak çal
+Yukarı taşı
+Aşağı taşı
+Listeye ekle
+Bilgiler
+Listeden kaldır
+EKOLAYZIR
+8D VE EFEKTLER
+Güçlü bas
+Güçlü tiz
+Kulaklık
+Rock
+Pop
+Vokal
+Dans
+Klasik
+Bas ve Tiz
+Hızlı ayar: bası ve tizi tek kaydırıcıyla güçlendirin.
+Bas
+Tiz (treble)
+Ekolayzır
+Hazır ayar seçin veya bantları tek tek ayarlayın.
+Bu telefon ekolayzırı desteklemiyor.
+8D Ses
+Ses kulaklıkta başınızın etrafında döner. Kulaklıkla dinleyin.
+8D açık
+Dönüş süresi
+sn
+Ses yükseltme
+Telefonun en yüksek sesinin üstüne çıkar. Yüksek ayarda ses bozulabilir; uzun süre çok yüksek sesle dinlemek kulağa zarar verir.
+Güçlendirme
+Bu telefon ses yükseltmeyi desteklemiyor.
+Surround ve Yankı
+Surround (3D genişlik)
+Yankı
+Kapalı
+Küçük oda
+Orta oda
+Büyük oda
+Salon
+Büyük salon
+Metalik
+Sol / Sağ dengesi
+Orta
+Sol %
+Sağ %
+Hız ve Perde
+Yavaşlatılmış (slowed) veya hızlandırılmış (nightcore) dinleme.
+Hız
+Perde (ses inceliği)
+Tüm ayarları sıfırla
+Ayarlar sıfırlandı
+Adsız
+Bilinmeyen sanatçı
+Bilinmeyen albüm
+Dahili hafıza
+Göz at
+SD kart (
+Görüntü
+Ses
+Listeler
+Diğerleri
+TÜM VİDEOLAR
+SANATÇILAR
+ALBÜMLER
+Kitaplıkta ara
+✓ Ada göre sırala
+Ada göre sırala
+✓ Tarihe göre sırala
+Tarihe göre sırala
+Kitaplığı yenile
+Kitaplık yenileniyor…
+Yükleniyor…
+Aramak için yazın
+Sonuç bulunamadı
+Müzik ve videoları göstermek için izin gerekli.\nİzin vermek için dokunun.
+Henüz liste yok.\nOynatıcı menüsünden "Listeyi kaydet" veya bir kaydın menüsünden "Listeye ekle" ile liste oluşturun.
+Burada hiç kayıt yok
+video
+kayıt
+medya dosyası
+Karışık çal
+Sıraya ekle
+Adını değiştir
+Sil
+Silinsin mi?
+" listesi silinecek. Dosyalar silinmez.
+İptal
+Kaydet
+Tema ve renk:
+· Cam ·
+Geçmiş
+Son oynatılan kayıtlar
+Bas, tiz ve ekolayzır
+8D ses ve efektler
+8D, ses yükseltme, surround, yankı, perde
+Belirlenen süre sonunda oynatmayı durdur
+Atlama süresi, jestler, kulaklık
+ses,
+Hakkında
+Kulaklık için müzik ve video oynatıcı.\n\nBas, tiz, ekolayzır, 8D ses, ses yükseltme, surround, yankı, hız ve perde ayarları hem müzikte hem videoda çalışır.
+Geçmişi temizle
+Geçmiş temizlensin mi?
+Temizle
+kayıt sıraya eklendi
+Karışık çalınıyor
+Ses olarak oynat
+Paylaş
+Sonraki olarak çalınacak
+Oynatma
+Önceki
+Duraklat
+Sonraki
+Kapat
+Turuncu
+Turkuaz
+Okyanus
+Lavanta
+Gül
+Mercan
+Zümrüt
+Kehribar
+Grafit
+Sistem
+Açık
+Koyu
+Küçük
+Normal
+Büyük
+Çok büyük
+5 dakika
+10 dakika
+15 dakika
+20 dakika
+30 dakika
+45 dakika
+1 saat
+1,5 saat
+Bu kayıt bitince
+kaldı)
+(kayıt bitince)
+Bu kayıt bitince duracak
+Uyku zamanlayıcı kapatıldı
+sonra duracak
+Tamam
+Sıfırla
+Kayıt henüz hazır değil
+Sıçranacak zaman (en fazla
+Git
+Yer imi
+Şu anı ekle
+Yer imi eklendi:
+Henüz yer imi yok.\n"Şu anı ekle" ile bulunduğunuz yeri kaydedin. Yer imine dokununca oraya gidilir, basılı tutunca silinir.
+Yer imi silindi
+A noktası:
+. B noktası için tekrar seçin.
+A-B yineleme:
+A-B yineleme kapatıldı
+Liste boş
+Liste adı
+Liste
+" kaydedildi (
+kayıt)
++ Yeni liste
+listesine eklendi
+Ad:
+Sanatçı:
+Albüm:
+Süre:
+Çözünürlük:
+Boyut:
+Biçim:
+Klasör:
+Konum:
+Görüntü bilgileri
+Kayıt bilgileri
+Şu anda izliyorum:
+Şu anda dinliyorum:
+Dosyayı paylaş
+Kulaklık çıkınca duraklat
+Videoya kaldığı yerden devam et
+Ses ve parlaklık için kaydırma
+Çift dokunuşla ileri / geri sar
+Video ekranında kalan süreyi göster
+Video ekranından çıkınca ses arka planda sürsün
+İleri / geri atlama süresi
+Anladım
+• Sağ üstteki liste düğmesi çalma sırasını açar / kapatır.
+• Büyüteç ile çalma sırasında arama yapabilirsiniz.
+• Önceki düğmesine kayıt başındayken basınca önceki kayda, 4 saniyeden sonra basınca kaydın başına gider.
+• Yineleme düğmesi: kapalı → tüm liste → tek kayıt.
+• Karışık düğmesi rastgele sırayla çalar.
+• Dengeleyici menüsünden bas, tiz, ekolayzır, 8D ses ve ses yükseltmeyi ayarlayın.
+• A-B yineleme: bir kez seçin (A), sonra tekrar seçin (B); aradaki bölüm tekrar eder. Üçüncü seçim kapatır.
+• Bir kayda dokunun: o kayıt çalar.
+• Kaydın sağındaki üç nokta: listeden kaldır, yukarı / aşağı taşı, sonraki olarak çal, başka listeye ekle.
+• "Listeyi kaydet" ile şu anki çalma sırasını adlandırıp saklayın; "Listeler" sekmesinde bulursunuz.
+• Ana ekranda bir kaydın üç noktasından "Sıraya ekle" ile listeye kayıt ekleyebilirsiniz.
+• Ekrana tek dokunuş: denetimleri gösterir / gizler.
+• Çift dokunuş: sağ tarafta ileri, sol tarafta geri sarar (süre Denetim ayarlarından değişir).
+• Sol tarafta yukarı-aşağı kaydırma: parlaklık. Sağ tarafta: ses.
+• Ekranda yatay kaydırma: videoda ileri / geri gider.
+• Kilitle: ekranı dokunmaya kapatır; açmak için ekrana dokunun, çıkan kilit düğmesini 3 saniye basılı tutun.
+• Ses olarak oynat: görüntüyü kapatıp sadece sesi çalar.
+• Açılan pencerede oynatıcı: video küçük pencerede diğer uygulamaların üstünde oynar.
+En iyi sığdır
+Ekranı doldur
+Ekrana uzat
+Orijinal boyut
+Parlaklık %
+Ses %
+Kilidi açmak için basılı tutun\n3
+Kilidi açmak için 3 saniye basılı tutun
+Kilit açıldı
+Kilidi açmak için basılı tutun
+Ekran kilitlendi. Açmak için kilit düğmesini 3 saniye basılı tutun.
+Kilitle
+Açılan pencerede oynatıcı
+Yineleme kipi
+Görüntü oynatıcı ipuçları
+Yineleme yok
+Bunu yinele
+Bu telefon açılan pencereyi desteklemiyor
+Açılan pencere açılamadı. Telefon ayarlarından bu uygulamaya "pencere içinde pencere" izni verin.
+Video
+Dil
+Sistem dili

@@ -1,0 +1,259 @@
+Aparência
+Tema
+Estilo
+Plano
+Vidro
+Cor
+Tamanho do texto
+Pré-visualização
+PASTAS
+FAIXAS
+24 faixas
+Faixa de exemplo
+3:45 · Artista
+Pesquisar na fila
+Aleatório ativado
+Aleatório desativado
+Repetição desativada
+Repetir tudo
+Repetir esta faixa
+Nada a tocar
+Timer de suspensão
+Velocidade de reprodução
+Ir para o tempo
+Equalizador
+Marcadores
+Repetição A-B
+Salvar lista
+Compartilhar info da faixa
+Configurações de controle
+Dicas do player de áudio
+Dicas de listas
+Reproduzir
+Tocar a seguir
+Mover para cima
+Mover para baixo
+Adicionar à lista
+Informações
+Remover da lista
+EQUALIZADOR
+8D E EFEITOS
+Reforço de graves
+Reforço de agudos
+Fones de ouvido
+Rock
+Pop
+Vocal
+Dance
+Clássica
+Graves e agudos
+Ajuste rápido: reforce graves e agudos com um só controle.
+Graves
+Agudos (treble)
+Equalizador
+Escolha uma predefinição ou ajuste as bandas uma a uma.
+Este telefone não suporta o equalizador.
+Som 8D
+O som gira ao redor da sua cabeça. Ouça com fones.
+8D ativado
+Tempo de rotação
+s
+Amplificar volume
+Passa do volume máximo do telefone. Em níveis altos o som pode distorcer; ouvir muito alto por muito tempo prejudica a audição.
+Amplificação
+Este telefone não suporta amplificar o volume.
+Surround e reverberação
+Surround (largura 3D)
+Reverberação
+Desligado
+Sala pequena
+Sala média
+Sala grande
+Salão
+Salão grande
+Metálico
+Balanço esquerda / direita
+Centro
+Esquerda %
+Direita %
+Velocidade e tom
+Ouvir mais lento (slowed) ou acelerado (nightcore).
+Velocidade
+Tom
+Redefinir todas as configurações
+Configurações redefinidas
+Sem título
+Artista desconhecido
+Álbum desconhecido
+Armazenamento interno
+Explorar
+Cartão SD (
+Vídeo
+Áudio
+Listas
+Mais
+TODOS OS VÍDEOS
+ARTISTAS
+ÁLBUNS
+Pesquisar na biblioteca
+✓ Ordenar por nome
+Ordenar por nome
+✓ Ordenar por data
+Ordenar por data
+Atualizar biblioteca
+Atualizando biblioteca…
+Carregando…
+Digite para pesquisar
+Nenhum resultado
+É preciso permissão para mostrar músicas e vídeos.\nToque para permitir.
+Ainda não há listas.\nCrie uma com "Salvar lista" no menu do player ou "Adicionar à lista" no menu de uma faixa.
+Nada aqui
+vídeos
+faixas
+arquivos de mídia
+Reprodução aleatória
+Adicionar à fila
+Renomear
+Excluir
+Excluir?
+" será excluída. Os arquivos não são apagados.
+Cancelar
+Salvar
+Tema e cor:
+· Vidro ·
+Histórico
+Tocadas recentemente
+Graves, agudos e equalizador
+Som 8D e efeitos
+8D, amplificação, surround, reverberação, tom
+Parar a reprodução após um tempo
+Tempo de salto, gestos, fones
+áudios,
+Sobre
+Player de música e vídeo para fones de ouvido.\n\nGraves, agudos, equalizador, som 8D, amplificação, surround, reverberação, velocidade e tom funcionam em música e vídeo.
+Limpar histórico
+Limpar histórico?
+Limpar
+faixas adicionadas à fila
+Tocando aleatoriamente
+Reproduzir como áudio
+Compartilhar
+Tocará a seguir
+Reprodução
+Anterior
+Pausar
+Próxima
+Fechar
+Laranja
+Turquesa
+Oceano
+Lavanda
+Rosa
+Coral
+Esmeralda
+Âmbar
+Grafite
+Sistema
+Claro
+Escuro
+Pequeno
+Normal
+Grande
+Muito grande
+5 minutos
+10 minutos
+15 minutos
+20 minutos
+30 minutos
+45 minutos
+1 hora
+1,5 hora
+Ao fim desta faixa
+restantes)
+(ao fim da faixa)
+Vai parar ao fim desta faixa
+Timer de suspensão desligado
+— depois a reprodução para
+OK
+Redefinir
+A faixa ainda não está pronta
+Ir para o tempo (máx.
+Ir
+Marcador
+Adicionar posição atual
+Marcador adicionado:
+Ainda não há marcadores.\nUse "Adicionar posição atual" para salvar onde você está. Toque num marcador para ir até lá; mantenha pressionado para excluir.
+Marcador excluído
+Ponto A:
+. Selecione de novo para o ponto B.
+Repetição A-B:
+Repetição A-B desativada
+A lista está vazia
+Nome da lista
+Lista
+" salva (
+faixas)
++ Nova lista
+adicionado à lista
+Nome:
+Artista:
+Álbum:
+Duração:
+Resolução:
+Tamanho:
+Formato:
+Pasta:
+Local:
+Informações do vídeo
+Informações da faixa
+Assistindo agora:
+Ouvindo agora:
+Compartilhar arquivo
+Pausar ao desconectar os fones
+Continuar vídeos de onde parou
+Deslizar para volume e brilho
+Toque duplo para avançar / voltar
+Mostrar tempo restante no vídeo
+Continuar o som ao sair do vídeo
+Tempo de avanço / retrocesso
+Entendi
+• O botão de lista no canto superior direito mostra / oculta a fila.
+• Use a lupa para pesquisar na fila.
+• Tocar em Anterior no início vai para a faixa anterior; depois de 4 segundos volta ao início da faixa.
+• Botão de repetição: desligado → tudo → uma.
+• O botão aleatório toca em ordem aleatória.
+• Ajuste graves, agudos, equalizador, som 8D e amplificação no menu Equalizador.
+• Repetição A-B: selecione uma vez (A) e de novo (B); o trecho entre eles se repete. A terceira seleção desliga.
+• Toque numa faixa: ela toca.
+• Os três pontos de uma faixa: remover da lista, mover para cima / baixo, tocar a seguir, adicionar a outra lista.
+• Use "Salvar lista" para nomear e guardar a fila atual; ela aparece na aba "Listas".
+• Na tela inicial, use "Adicionar à fila" nos três pontos de uma faixa.
+• Um toque: mostra / oculta os controles.
+• Toque duplo: à direita avança, à esquerda volta (tempo alterável em Configurações de controle).
+• Deslizar para cima-baixo à esquerda: brilho. À direita: volume.
+• Deslizar na horizontal: avançar / voltar no vídeo.
+• Bloquear: impede toques; para desbloquear, toque na tela e segure o cadeado por 3 segundos.
+• Reproduzir como áudio: desliga a imagem e toca só o som.
+• Player flutuante: o vídeo toca numa janela pequena sobre outros apps.
+Melhor ajuste
+Preencher tela
+Esticar
+Tamanho original
+Brilho %
+Volume %
+Segure para desbloquear\n3
+Segure 3 segundos para desbloquear
+Desbloqueado
+Segure para desbloquear
+Tela bloqueada. Segure o cadeado por 3 segundos para desbloquear.
+Bloquear
+Player flutuante
+Modo de repetição
+Dicas do player de vídeo
+Sem repetição
+Repetir este
+Este telefone não suporta janelas flutuantes
+Não foi possível abrir a janela flutuante. Permita "picture-in-picture" para este app nas configurações do telefone.
+Vídeo
+Idioma
+Idioma do sistema

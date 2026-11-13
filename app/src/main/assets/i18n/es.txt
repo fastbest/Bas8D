@@ -1,0 +1,259 @@
+Apariencia
+Tema
+Estilo
+Plano
+Cristal
+Color
+Tamaño del texto
+Vista previa
+CARPETAS
+PISTAS
+24 pistas
+Pista de ejemplo
+3:45 · Artista
+Buscar en la cola
+Aleatorio activado
+Aleatorio desactivado
+Repetición desactivada
+Repetir todo
+Repetir esta pista
+No se reproduce nada
+Temporizador de apagado
+Velocidad de reproducción
+Saltar a un tiempo
+Ecualizador
+Marcadores
+Repetir A-B
+Guardar lista
+Compartir información
+Ajustes de control
+Consejos del reproductor de audio
+Consejos de listas
+Reproducir
+Reproducir a continuación
+Subir
+Bajar
+Añadir a una lista
+Información
+Quitar de la lista
+ECUALIZADOR
+8D Y EFECTOS
+Refuerzo de graves
+Refuerzo de agudos
+Auriculares
+Rock
+Pop
+Vocal
+Dance
+Clásica
+Graves y agudos
+Ajuste rápido: refuerza graves y agudos con un solo control.
+Graves
+Agudos (treble)
+Ecualizador
+Elige un preajuste o ajusta las bandas una a una.
+Este teléfono no admite el ecualizador.
+Sonido 8D
+El sonido gira alrededor de tu cabeza. Escucha con auriculares.
+8D activado
+Tiempo de giro
+s
+Amplificar volumen
+Supera el volumen máximo del teléfono. En niveles altos el sonido puede distorsionarse; escuchar muy alto durante mucho tiempo daña el oído.
+Amplificación
+Este teléfono no admite amplificar el volumen.
+Envolvente y reverberación
+Envolvente (amplitud 3D)
+Reverberación
+Desactivado
+Habitación pequeña
+Habitación mediana
+Habitación grande
+Sala
+Sala grande
+Metálico
+Balance izquierda / derecha
+Centro
+Izquierda %
+Derecha %
+Velocidad y tono
+Escucha ralentizada (slowed) o acelerada (nightcore).
+Velocidad
+Tono
+Restablecer todos los ajustes
+Ajustes restablecidos
+Sin título
+Artista desconocido
+Álbum desconocido
+Almacenamiento interno
+Explorar
+Tarjeta SD (
+Vídeo
+Audio
+Listas
+Más
+TODOS LOS VÍDEOS
+ARTISTAS
+ÁLBUMES
+Buscar en la biblioteca
+✓ Ordenar por nombre
+Ordenar por nombre
+✓ Ordenar por fecha
+Ordenar por fecha
+Actualizar biblioteca
+Actualizando biblioteca…
+Cargando…
+Escribe para buscar
+Sin resultados
+Se necesita permiso para mostrar música y vídeos.\nToca para conceder el permiso.
+Aún no hay listas.\nCrea una con "Guardar lista" en el menú del reproductor o "Añadir a una lista" en el menú de una pista.
+No hay nada aquí
+vídeos
+pistas
+archivos multimedia
+Reproducción aleatoria
+Añadir a la cola
+Cambiar nombre
+Eliminar
+¿Eliminar?
+" se eliminará. Los archivos no se borran.
+Cancelar
+Guardar
+Tema y color:
+· Cristal ·
+Historial
+Reproducidos recientemente
+Graves, agudos y ecualizador
+Sonido 8D y efectos
+8D, amplificación, envolvente, reverberación, tono
+Detener la reproducción tras un tiempo
+Tiempo de salto, gestos, auriculares
+audios,
+Acerca de
+Reproductor de música y vídeo para auriculares.\n\nGraves, agudos, ecualizador, sonido 8D, amplificación, envolvente, reverberación, velocidad y tono funcionan en música y vídeo.
+Borrar historial
+¿Borrar el historial?
+Borrar
+pistas añadidas a la cola
+Reproducción aleatoria
+Reproducir como audio
+Compartir
+Se reproducirá a continuación
+Reproducción
+Anterior
+Pausa
+Siguiente
+Cerrar
+Naranja
+Turquesa
+Océano
+Lavanda
+Rosa
+Coral
+Esmeralda
+Ámbar
+Grafito
+Sistema
+Claro
+Oscuro
+Pequeño
+Normal
+Grande
+Muy grande
+5 minutos
+10 minutos
+15 minutos
+20 minutos
+30 minutos
+45 minutos
+1 hora
+1,5 horas
+Al terminar esta pista
+restantes)
+(al terminar la pista)
+Se detendrá al terminar esta pista
+Temporizador desactivado
+— después se detendrá la reproducción
+Aceptar
+Restablecer
+La pista aún no está lista
+Saltar a un tiempo (máx.
+Ir
+Marcador
+Añadir posición actual
+Marcador añadido:
+Aún no hay marcadores.\nUsa "Añadir posición actual" para guardar dónde estás. Toca un marcador para ir allí; mantén pulsado para borrarlo.
+Marcador eliminado
+Punto A:
+. Selecciona de nuevo para el punto B.
+Repetir A-B:
+Repetir A-B desactivado
+La lista está vacía
+Nombre de la lista
+Lista
+" guardada (
+pistas)
++ Nueva lista
+añadido a la lista
+Nombre:
+Artista:
+Álbum:
+Duración:
+Resolución:
+Tamaño:
+Formato:
+Carpeta:
+Ubicación:
+Información del vídeo
+Información de la pista
+Viendo ahora:
+Escuchando ahora:
+Compartir archivo
+Pausar al desconectar auriculares
+Continuar vídeos donde los dejaste
+Deslizar para volumen y brillo
+Doble toque para avanzar / retroceder
+Mostrar tiempo restante en el vídeo
+Seguir el audio al salir del vídeo
+Tiempo de avance / retroceso
+Entendido
+• El botón de lista arriba a la derecha muestra / oculta la cola.
+• Usa la lupa para buscar en la cola.
+• Pulsar Anterior al inicio va a la pista anterior; después de 4 segundos vuelve al inicio de la pista.
+• Botón de repetición: desactivado → todo → una.
+• El botón aleatorio reproduce en orden aleatorio.
+• Ajusta graves, agudos, ecualizador, sonido 8D y amplificación desde el menú Ecualizador.
+• Repetir A-B: selecciona una vez (A) y otra vez (B); el tramo entre ambos se repite. Una tercera selección lo desactiva.
+• Toca una pista: se reproduce.
+• Los tres puntos de una pista: quitar de la lista, subir / bajar, reproducir a continuación, añadir a otra lista.
+• Usa "Guardar lista" para nombrar y guardar la cola actual; la encontrarás en la pestaña "Listas".
+• En la pantalla principal, usa "Añadir a la cola" desde los tres puntos de una pista.
+• Un toque: muestra / oculta los controles.
+• Doble toque: a la derecha avanza, a la izquierda retrocede (el tiempo se cambia en Ajustes de control).
+• Deslizar arriba-abajo a la izquierda: brillo. A la derecha: volumen.
+• Deslizar en horizontal: avanzar / retroceder en el vídeo.
+• Bloquear: impide los toques; para desbloquear toca la pantalla y mantén pulsado el candado 3 segundos.
+• Reproducir como audio: apaga la imagen y reproduce solo el sonido.
+• Reproductor flotante: el vídeo se reproduce en una ventana pequeña sobre otras apps.
+Mejor ajuste
+Llenar pantalla
+Estirar
+Tamaño original
+Brillo %
+Volumen %
+Mantén pulsado para desbloquear\n3
+Mantén pulsado 3 segundos para desbloquear
+Desbloqueado
+Mantén pulsado para desbloquear
+Pantalla bloqueada. Mantén pulsado el candado 3 segundos para desbloquear.
+Bloquear
+Reproductor flotante
+Modo de repetición
+Consejos del reproductor de vídeo
+Sin repetición
+Repetir esto
+Este teléfono no admite ventanas flotantes
+No se pudo abrir la ventana flotante. Permite "imagen en imagen" para esta app en los ajustes del teléfono.
+Vídeo
+Idioma
+Idioma del sistema

@@ -54,7 +54,7 @@ public class AppearanceActivity extends Activity {
         bar.setMinimumHeight(dp(64));
         bar.setPadding(dp(4), 0, dp(12), 0);
         bar.addView(Ui.btn(this, R.drawable.ic_back, Ui.TXT, 24, 12, v -> finish()));
-        TextView t = Ui.text(this, "Görünüm", 21, Ui.TXT, true);
+        TextView t = Ui.text(this, L.t("Görünüm"), 21, Ui.TXT, true);
         t.setPadding(dp(8), 0, 0, 0);
         bar.addView(t);
         root.addView(bar);
@@ -63,19 +63,19 @@ public class AppearanceActivity extends Activity {
         body.setOrientation(LinearLayout.VERTICAL);
         body.setPadding(dp(18), 0, dp(18), dp(30));
 
-        body.addView(label("Tema"));
+        body.addView(label(L.t("Tema")));
         body.addView(segmented(Ui.THEMES, sp.getInt("tema", 2), k -> {
             sp.edit().putInt("tema", k).commit();
             changed();
         }));
 
-        body.addView(label("Stil"));
-        body.addView(segmented(new String[]{"Düz", "Cam"}, Ui.GLASS ? 1 : 0, k -> {
+        body.addView(label(L.t("Stil")));
+        body.addView(segmented(new String[]{L.t("Düz"), L.t("Cam")}, Ui.GLASS ? 1 : 0, k -> {
             sp.edit().putBoolean("cam", k == 1).commit();
             changed();
         }));
 
-        body.addView(label("Renk"));
+        body.addView(label(L.t("Renk")));
         final int sel = Math.max(0, Math.min(Ui.SWATCHES.length - 1, sp.getInt("renk", 0)));
         HorizontalScrollView hs = new HorizontalScrollView(this);
         hs.setHorizontalScrollBarEnabled(false);
@@ -112,7 +112,7 @@ public class AppearanceActivity extends Activity {
         name.setPadding(dp(2), dp(8), 0, 0);
         body.addView(name);
 
-        body.addView(label("Yazı boyutu"));
+        body.addView(label(L.t("Yazı boyutu")));
         int zsel = 1;
         float cur = sp.getFloat("yazi", 1f);
         for (int i = 0; i < Ui.ZOOMS.length; i++) if (Math.abs(Ui.ZOOMS[i] - cur) < 0.01f) zsel = i;
@@ -121,7 +121,7 @@ public class AppearanceActivity extends Activity {
             changed();
         }));
 
-        body.addView(label("Ön izleme"));
+        body.addView(label(L.t("Ön izleme")));
         body.addView(preview());
 
         ScrollView sv = new ScrollView(this);
@@ -181,22 +181,22 @@ public class AppearanceActivity extends Activity {
         LinearLayout tabs = new LinearLayout(this);
         tabs.setBackgroundColor(Ui.BAR);
         tabs.setPadding(dp(14), 0, dp(14), 0);
-        TextView a = Ui.text(this, "KLASÖRLER", 13, Ui.ORANGE, true);
+        TextView a = Ui.text(this, L.t("KLASÖRLER"), 13, Ui.ORANGE, true);
         a.setPadding(0, dp(6), dp(20), dp(8));
-        TextView b = Ui.text(this, "KAYITLAR", 13, Ui.TXT, true);
+        TextView b = Ui.text(this, L.t("KAYITLAR"), 13, Ui.TXT, true);
         b.setPadding(0, dp(6), 0, dp(8));
         tabs.addView(a);
         tabs.addView(b);
         prev.addView(tabs);
 
-        prev.addView(sampleRow(R.drawable.ic_folder, "Music", "24 kayıt", false));
-        prev.addView(sampleRow(R.drawable.ic_bars, "Örnek kayıt", "3:45 · Sanatçı", true));
+        prev.addView(sampleRow(R.drawable.ic_folder, "Music", L.t("24 kayıt"), false));
+        prev.addView(sampleRow(R.drawable.ic_bars, L.t("Örnek kayıt"), L.t("3:45 · Sanatçı"), true));
 
         LinearLayout mini = new LinearLayout(this);
         mini.setGravity(Gravity.CENTER_VERTICAL);
         mini.setBackgroundColor(Ui.BAR);
         mini.setPadding(dp(14), dp(8), dp(10), dp(8));
-        TextView mt = Ui.text(this, "Örnek kayıt", 14, Ui.TXT, false);
+        TextView mt = Ui.text(this, L.t("Örnek kayıt"), 14, Ui.TXT, false);
         mini.addView(mt, new LinearLayout.LayoutParams(0, WC, 1));
         TextView tm = Ui.text(this, "1:12", 13, Ui.TXT, false);
         tm.setPadding(0, 0, dp(10), 0);

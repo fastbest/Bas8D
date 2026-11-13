@@ -1,0 +1,259 @@
+Ko‘rinish
+Mavzu
+Uslub
+Oddiy
+Shisha
+Rang
+Matn o‘lchami
+Oldindan ko‘rish
+JILDLAR
+YOZUVLAR
+24 ta yozuv
+Namuna yozuv
+3:45 · Ijrochi
+Navbatdan qidirish
+Aralash ijro yoqildi
+Aralash ijro o‘chirildi
+Takrorlash o‘chiq
+Hammasini takrorlash
+Shu yozuvni takrorlash
+Hech narsa ijro etilmayapti
+Uyqu taymeri
+Ijro tezligi
+Vaqtga o‘tish
+Ekvalayzer
+Xatcho‘plar
+A-B takrorlash
+Ro‘yxatni saqlash
+Yozuv ma’lumotini ulashish
+Boshqaruv sozlamalari
+Audio pleyer maslahatlari
+Ro‘yxat maslahatlari
+Ijro etish
+Keyingi bo‘lib ijro etish
+Yuqoriga ko‘chirish
+Pastga ko‘chirish
+Ro‘yxatga qo‘shish
+Ma’lumot
+Ro‘yxatdan olib tashlash
+EKVALAYZER
+8D VA EFFEKTLAR
+Kuchli bas
+Kuchli tiz
+Quloqchin
+Rok
+Pop
+Vokal
+Raqs
+Klassik
+Bas va tiz
+Tez sozlash: bas va tizni bitta surgich bilan kuchaytiring.
+Bas
+Tiz (treble)
+Ekvalayzer
+Tayyor sozlamani tanlang yoki chastotalarni birma-bir sozlang.
+Bu telefon ekvalayzerni qo‘llab-quvvatlamaydi.
+8D ovoz
+Ovoz boshingiz atrofida aylanadi. Quloqchin bilan tinglang.
+8D yoqilgan
+Aylanish vaqti
+s
+Ovozni kuchaytirish
+Telefonning eng baland ovozidan ham balandroq. Yuqori sozlamada ovoz buzilishi mumkin; uzoq vaqt juda baland tinglash quloqqa zarar.
+Kuchaytirish
+Bu telefon ovozni kuchaytirishni qo‘llab-quvvatlamaydi.
+Surround va aks-sado
+Surround (3D kenglik)
+Aks-sado
+O‘chiq
+Kichik xona
+O‘rta xona
+Katta xona
+Zal
+Katta zal
+Metall
+Chap / O‘ng muvozanati
+O‘rta
+Chap %
+O‘ng %
+Tezlik va ohang
+Sekinlashtirilgan (slowed) yoki tezlashtirilgan (nightcore) tinglash.
+Tezlik
+Ohang
+Barcha sozlamalarni tiklash
+Sozlamalar tiklandi
+Nomsiz
+Noma’lum ijrochi
+Noma’lum albom
+Ichki xotira
+Ko‘rib chiqish
+SD karta (
+Video
+Audio
+Ro‘yxatlar
+Boshqalar
+BARCHA VIDEOLAR
+IJROCHILAR
+ALBOMLAR
+Kutubxonadan qidirish
+✓ Nomi bo‘yicha saralash
+Nomi bo‘yicha saralash
+✓ Sana bo‘yicha saralash
+Sana bo‘yicha saralash
+Kutubxonani yangilash
+Kutubxona yangilanmoqda…
+Yuklanmoqda…
+Qidirish uchun yozing
+Hech narsa topilmadi
+Musiqa va videolarni ko‘rsatish uchun ruxsat kerak.\nRuxsat berish uchun bosing.
+Hali ro‘yxat yo‘q.\nPleyer menyusidagi "Ro‘yxatni saqlash" yoki yozuv menyusidagi "Ro‘yxatga qo‘shish" bilan ro‘yxat yarating.
+Bu yerda hech narsa yo‘q
+ta video
+ta yozuv
+ta media fayl
+Aralash ijro
+Navbatga qo‘shish
+Nomini o‘zgartirish
+O‘chirish
+O‘chirilsinmi?
+" ro‘yxati o‘chiriladi. Fayllar o‘chirilmaydi.
+Bekor qilish
+Saqlash
+Mavzu va rang:
+· Shisha ·
+Tarix
+Yaqinda ijro etilganlar
+Bas, tiz va ekvalayzer
+8D ovoz va effektlar
+8D, ovozni kuchaytirish, surround, aks-sado, ohang
+Belgilangan vaqtdan keyin ijroni to‘xtatish
+O‘tkazish vaqti, imo-ishoralar, quloqchin
+ta audio,
+Ilova haqida
+Quloqchin uchun musiqa va video pleyer.\n\nBas, tiz, ekvalayzer, 8D ovoz, ovozni kuchaytirish, surround, aks-sado, tezlik va ohang ham musiqada, ham videoda ishlaydi.
+Tarixni tozalash
+Tarix tozalansinmi?
+Tozalash
+ta yozuv navbatga qo‘shildi
+Aralash ijro etilmoqda
+Audio sifatida ijro etish
+Ulashish
+Keyingi bo‘lib ijro etiladi
+Ijro
+Oldingi
+Pauza
+Keyingi
+Yopish
+To‘q sariq
+Firuza
+Okean
+Lavanda
+Atirgul
+Marjon
+Zumrad
+Qahrabo
+Grafit
+Tizim
+Yorug‘
+Qorong‘i
+Kichik
+Oddiy
+Katta
+Juda katta
+5 daqiqa
+10 daqiqa
+15 daqiqa
+20 daqiqa
+30 daqiqa
+45 daqiqa
+1 soat
+1,5 soat
+Shu yozuv tugaganda
+qoldi)
+(yozuv tugaganda)
+Shu yozuv tugaganda to‘xtaydi
+Uyqu taymeri o‘chirildi
+dan keyin to‘xtaydi
+OK
+Tiklash
+Yozuv hali tayyor emas
+Vaqtga o‘tish (ko‘pi bilan
+O‘tish
+Xatcho‘p
+Hozirgi joyni qo‘shish
+Xatcho‘p qo‘shildi:
+Hali xatcho‘p yo‘q.\n"Hozirgi joyni qo‘shish" bilan turgan joyingizni saqlang. Xatcho‘pga bosilsa o‘sha joyga o‘tadi, bosib turilsa o‘chadi.
+Xatcho‘p o‘chirildi
+A nuqta:
+. B nuqta uchun yana tanlang.
+A-B takrorlash:
+A-B takrorlash o‘chirildi
+Ro‘yxat bo‘sh
+Ro‘yxat nomi
+Ro‘yxat
+" saqlandi (
+ta yozuv)
++ Yangi ro‘yxat
+ro‘yxatiga qo‘shildi
+Nomi:
+Ijrochi:
+Albom:
+Davomiyligi:
+O‘lchamlari:
+Hajmi:
+Formati:
+Jild:
+Joylashuvi:
+Video ma’lumoti
+Yozuv ma’lumoti
+Hozir tomosha qilyapman:
+Hozir tinglayapman:
+Faylni ulashish
+Quloqchin uzilganda pauza
+Videoni to‘xtagan joyidan davom ettirish
+Ovoz va yorqinlik uchun surish
+Ikki marta bosib oldinga / orqaga
+Video pleyerda qolgan vaqtni ko‘rsatish
+Videodan chiqqanda ovoz fonda davom etsin
+Oldinga / orqaga o‘tkazish vaqti
+Tushundim
+• O‘ng yuqoridagi ro‘yxat tugmasi navbatni ochadi / yopadi.
+• Lupa bilan navbatdan qidirish mumkin.
+• Yozuv boshida "Oldingi" bosilsa oldingi yozuvga, 4 soniyadan keyin bosilsa yozuv boshiga o‘tadi.
+• Takrorlash tugmasi: o‘chiq → hammasi → bittasi.
+• Aralash tugmasi tasodifiy tartibda ijro etadi.
+• Bas, tiz, ekvalayzer, 8D ovoz va ovozni kuchaytirish "Ekvalayzer" menyusida sozlanadi.
+• A-B takrorlash: bir marta tanlang (A), keyin yana (B); oradagi qism takrorlanadi. Uchinchi tanlov o‘chiradi.
+• Yozuvga bosing: u ijro etiladi.
+• Yozuv yonidagi uch nuqta: ro‘yxatdan olib tashlash, yuqoriga / pastga ko‘chirish, keyingi bo‘lib ijro etish, boshqa ro‘yxatga qo‘shish.
+• "Ro‘yxatni saqlash" bilan hozirgi navbatni nomlab saqlang; uni "Ro‘yxatlar" bo‘limida topasiz.
+• Bosh ekranda yozuvning uch nuqtasidan "Navbatga qo‘shish" orqali yozuv qo‘shishingiz mumkin.
+• Bir marta bosish: boshqaruvni ko‘rsatadi / yashiradi.
+• Ikki marta bosish: o‘ngda oldinga, chapda orqaga o‘tkazadi (vaqt Boshqaruv sozlamalarida o‘zgaradi).
+• Chap tomonda yuqori-pastga surish: yorqinlik. O‘ngda: ovoz.
+• Gorizontal surish: videoda oldinga / orqaga.
+• Qulflash: ekran bosishga javob bermaydi; ochish uchun ekranga bosing va qulf tugmasini 3 soniya bosib turing.
+• Audio sifatida ijro etish: tasvirni o‘chirib, faqat ovozni ijro etadi.
+• Qalqib chiquvchi pleyer: video boshqa ilovalar ustida kichik oynada ijro etiladi.
+Eng yaxshi moslash
+Ekranni to‘ldirish
+Cho‘zish
+Asl o‘lcham
+Yorqinlik %
+Ovoz %
+Qulfni ochish uchun bosib turing\n3
+Qulfni ochish uchun 3 soniya bosib turing
+Qulf ochildi
+Qulfni ochish uchun bosib turing
+Ekran qulflandi. Ochish uchun qulf tugmasini 3 soniya bosib turing.
+Qulflash
+Qalqib chiquvchi pleyer
+Takrorlash rejimi
+Video pleyer maslahatlari
+Takrorlamaslik
+Shuni takrorlash
+Bu telefon qalqib chiquvchi oynani qo‘llab-quvvatlamaydi
+Qalqib chiquvchi oyna ochilmadi. Telefon sozlamalarida ilovaga "rasm ichida rasm" ruxsatini bering.
+Video
+Til
+Tizim tili

@@ -1,0 +1,259 @@
+Darstellung
+Design
+Stil
+Flach
+Glas
+Farbe
+Textgröße
+Vorschau
+ORDNER
+TITEL
+24 Titel
+Beispieltitel
+3:45 · Interpret
+In Warteschlange suchen
+Zufallswiedergabe an
+Zufallswiedergabe aus
+Wiederholen aus
+Alle wiederholen
+Diesen Titel wiederholen
+Keine Wiedergabe
+Schlaftimer
+Wiedergabegeschwindigkeit
+Zu Zeit springen
+Equalizer
+Lesezeichen
+A-B-Wiederholung
+Liste speichern
+Titelinfo teilen
+Steuerungseinstellungen
+Tipps zum Audioplayer
+Tipps zu Listen
+Abspielen
+Als Nächstes abspielen
+Nach oben
+Nach unten
+Zu Liste hinzufügen
+Infos
+Aus Liste entfernen
+EQUALIZER
+8D & EFFEKTE
+Bass-Boost
+Höhen-Boost
+Kopfhörer
+Rock
+Pop
+Gesang
+Dance
+Klassik
+Bass & Höhen
+Schnelleinstellung: Bass und Höhen mit einem Regler verstärken.
+Bass
+Höhen (Treble)
+Equalizer
+Voreinstellung wählen oder Bänder einzeln anpassen.
+Dieses Telefon unterstützt keinen Equalizer.
+8D-Sound
+Der Klang kreist um deinen Kopf. Mit Kopfhörern hören.
+8D an
+Umlaufzeit
+s
+Lautstärke-Boost
+Lauter als die maximale Lautstärke des Telefons. Hohe Werte können verzerren; lange sehr laut hören schadet dem Gehör.
+Verstärkung
+Dieses Telefon unterstützt keinen Lautstärke-Boost.
+Surround & Hall
+Surround (3D-Breite)
+Hall
+Aus
+Kleiner Raum
+Mittlerer Raum
+Großer Raum
+Saal
+Großer Saal
+Metallisch
+Balance links / rechts
+Mitte
+Links %
+Rechts %
+Tempo & Tonhöhe
+Verlangsamt (slowed) oder beschleunigt (nightcore) hören.
+Tempo
+Tonhöhe
+Alle Einstellungen zurücksetzen
+Einstellungen zurückgesetzt
+Ohne Titel
+Unbekannter Interpret
+Unbekanntes Album
+Interner Speicher
+Durchsuchen
+SD-Karte (
+Video
+Audio
+Listen
+Mehr
+ALLE VIDEOS
+INTERPRETEN
+ALBEN
+Mediathek durchsuchen
+✓ Nach Name sortieren
+Nach Name sortieren
+✓ Nach Datum sortieren
+Nach Datum sortieren
+Mediathek aktualisieren
+Mediathek wird aktualisiert…
+Wird geladen…
+Zum Suchen tippen
+Keine Ergebnisse
+Zum Anzeigen von Musik und Videos ist eine Berechtigung nötig.\nZum Erlauben tippen.
+Noch keine Listen.\nErstelle eine mit „Liste speichern“ im Playermenü oder „Zu Liste hinzufügen“ im Titelmenü.
+Hier ist nichts
+Videos
+Titel
+Mediendateien
+Zufällig abspielen
+Zur Warteschlange
+Umbenennen
+Löschen
+Löschen?
+" wird gelöscht. Dateien werden nicht gelöscht.
+Abbrechen
+Speichern
+Design und Farbe:
+· Glas ·
+Verlauf
+Zuletzt gespielt
+Bass, Höhen und Equalizer
+8D-Sound & Effekte
+8D, Lautstärke-Boost, Surround, Hall, Tonhöhe
+Wiedergabe nach einer Zeit stoppen
+Sprungzeit, Gesten, Kopfhörer
+Audio,
+Über
+Musik- und Videoplayer für Kopfhörer.\n\nBass, Höhen, Equalizer, 8D-Sound, Lautstärke-Boost, Surround, Hall, Tempo und Tonhöhe funktionieren für Musik und Video.
+Verlauf löschen
+Verlauf löschen?
+Löschen
+Titel zur Warteschlange hinzugefügt
+Zufallswiedergabe
+Als Audio abspielen
+Teilen
+Wird als Nächstes gespielt
+Wiedergabe
+Zurück
+Pause
+Weiter
+Schließen
+Orange
+Türkis
+Ozean
+Lavendel
+Rose
+Koralle
+Smaragd
+Bernstein
+Graphit
+System
+Hell
+Dunkel
+Klein
+Normal
+Groß
+Sehr groß
+5 Minuten
+10 Minuten
+15 Minuten
+20 Minuten
+30 Minuten
+45 Minuten
+1 Stunde
+1,5 Stunden
+Am Ende dieses Titels
+übrig)
+(am Titelende)
+Stoppt am Ende dieses Titels
+Schlaftimer aus
+— dann stoppt die Wiedergabe
+OK
+Zurücksetzen
+Titel ist noch nicht bereit
+Zu Zeit springen (max.
+Los
+Lesezeichen
+Aktuelle Position hinzufügen
+Lesezeichen hinzugefügt:
+Noch keine Lesezeichen.\nMit „Aktuelle Position hinzufügen“ deine Stelle speichern. Tippen springt dorthin, lange drücken löscht.
+Lesezeichen gelöscht
+Punkt A:
+. Für Punkt B erneut wählen.
+A-B-Wiederholung:
+A-B-Wiederholung aus
+Liste ist leer
+Listenname
+Liste
+" gespeichert (
+Titel)
++ Neue Liste
+zur Liste hinzugefügt
+Name:
+Interpret:
+Album:
+Dauer:
+Auflösung:
+Größe:
+Format:
+Ordner:
+Speicherort:
+Videoinfo
+Titelinfo
+Ich schaue gerade:
+Ich höre gerade:
+Datei teilen
+Pause, wenn Kopfhörer getrennt werden
+Videos an der letzten Stelle fortsetzen
+Wischen für Lautstärke und Helligkeit
+Doppeltippen zum Vor- / Zurückspulen
+Restzeit im Videoplayer anzeigen
+Ton nach Verlassen des Videos weiterspielen
+Sprungzeit vor / zurück
+Verstanden
+• Die Listentaste oben rechts zeigt / verbirgt die Warteschlange.
+• Mit der Lupe in der Warteschlange suchen.
+• „Zurück“ am Titelanfang springt zum vorigen Titel; nach 4 Sekunden zum Anfang des Titels.
+• Wiederholtaste: aus → alle → einer.
+• Die Zufallstaste spielt in zufälliger Reihenfolge.
+• Bass, Höhen, Equalizer, 8D-Sound und Lautstärke-Boost im Equalizer-Menü einstellen.
+• A-B-Wiederholung: einmal wählen (A), dann erneut (B); der Abschnitt dazwischen wiederholt sich. Dritte Auswahl beendet sie.
+• Titel antippen: er wird abgespielt.
+• Drei Punkte am Titel: aus Liste entfernen, nach oben / unten, als Nächstes abspielen, zu anderer Liste hinzufügen.
+• Mit „Liste speichern“ die aktuelle Warteschlange benennen und behalten; sie erscheint im Tab „Listen“.
+• Auf dem Startbildschirm über die drei Punkte eines Titels „Zur Warteschlange“ wählen.
+• Einmal tippen: Steuerung ein- / ausblenden.
+• Doppeltippen: rechts vor, links zurück (Zeit in den Steuerungseinstellungen änderbar).
+• Links hoch-runter wischen: Helligkeit. Rechts: Lautstärke.
+• Waagerecht wischen: im Video vor / zurück.
+• Sperren: blockiert Berührungen; zum Entsperren Bildschirm antippen und Schloss 3 Sekunden halten.
+• Als Audio abspielen: Bild aus, nur Ton.
+• Pop-up-Player: das Video läuft in einem kleinen Fenster über anderen Apps.
+Beste Anpassung
+Bildschirm füllen
+Strecken
+Originalgröße
+Helligkeit %
+Lautstärke %
+Zum Entsperren halten\n3
+3 Sekunden halten zum Entsperren
+Entsperrt
+Zum Entsperren halten
+Bildschirm gesperrt. Schloss 3 Sekunden halten zum Entsperren.
+Sperren
+Pop-up-Player
+Wiederholmodus
+Tipps zum Videoplayer
+Keine Wiederholung
+Dies wiederholen
+Dieses Telefon unterstützt keine Pop-up-Fenster
+Pop-up-Fenster konnte nicht geöffnet werden. Erlaube „Bild-im-Bild“ für diese App in den Telefoneinstellungen.
+Video
+Sprache
+Systemsprache

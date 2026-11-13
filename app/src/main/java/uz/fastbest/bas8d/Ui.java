@@ -62,12 +62,12 @@ public class Ui {
     private static String loadedKey = "";
 
     public static final String[][] SWATCHES = {
-            {"Turuncu", "#FF8800"}, {"Turkuaz", "#5FA3B0"}, {"Okyanus", "#3B8FE0"}, {"Lavanta", "#8E7CE8"},
-            {"Gül", "#E0679C"}, {"Mercan", "#F2655B"}, {"Zümrüt", "#2EA56F"}, {"Kehribar", "#E0A23B"},
-            {"Grafit", "#7D8396"}};
-    public static final String[] THEMES = {"Sistem", "Açık", "Koyu"};
+            {L.t("Turuncu"), "#FF8800"}, {L.t("Turkuaz"), "#5FA3B0"}, {L.t("Okyanus"), "#3B8FE0"}, {L.t("Lavanta"), "#8E7CE8"},
+            {L.t("Gül"), "#E0679C"}, {L.t("Mercan"), "#F2655B"}, {L.t("Zümrüt"), "#2EA56F"}, {L.t("Kehribar"), "#E0A23B"},
+            {L.t("Grafit"), "#7D8396"}};
+    public static final String[] THEMES = {L.t("Sistem"), L.t("Açık"), L.t("Koyu")};
     public static final float[] ZOOMS = {0.85f, 1f, 1.15f, 1.3f};
-    public static final String[] ZOOM_LABELS = {"Küçük", "Normal", "Büyük", "Çok büyük"};
+    public static final String[] ZOOM_LABELS = {L.t("Küçük"), L.t("Normal"), L.t("Büyük"), L.t("Çok büyük")};
 
     private static int mix(int a, int b, float t) {
         return android.graphics.Color.rgb(
@@ -145,6 +145,7 @@ public class Ui {
         }
         a.getWindow().getDecorView().setSystemUiVisibility(f);
         if (GLASS) a.getWindow().setBackgroundDrawable(pageBg());
+        a.getWindow().getDecorView().setLayoutDirection(L.rtl() ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
     }
     public static final int MP = ViewGroup.LayoutParams.MATCH_PARENT, WC = ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -272,7 +273,7 @@ public class Ui {
                 ImageView iv = img(c, icons[i], TXT, 26, 0);
                 row.addView(iv);
             }
-            TextView t = text(c, labels[i], 17, TXT, false);
+            TextView t = text(c, L.t(labels[i]), 17, TXT, false);
             t.setPadding(icons != null ? dp(c, 22) : dp(c, 6), 0, 0, 0);
             row.addView(t);
             row.setOnClickListener(v -> { pw.dismiss(); cb.on(k); });
@@ -356,17 +357,17 @@ public class Ui {
 
     public static void sleepDialog(Context c, PlayerService s) {
         final int[] mins = {0, 5, 10, 15, 20, 30, 45, 60, 90, -1};
-        String[] names = {"Kapalı", "5 dakika", "10 dakika", "15 dakika", "20 dakika", "30 dakika",
-                "45 dakika", "1 saat", "1,5 saat", "Bu kayıt bitince"};
-        String title = "Uyku zamanlayıcı";
+        String[] names = {L.t("Kapalı"), L.t("5 dakika"), L.t("10 dakika"), L.t("15 dakika"), L.t("20 dakika"), L.t("30 dakika"),
+                L.t("45 dakika"), L.t("1 saat"), L.t("1,5 saat"), L.t("Bu kayıt bitince")};
+        String title = L.t("Uyku zamanlayıcı");
         long left = s.sleepAt - System.currentTimeMillis();
-        if (s.sleepAt > 0 && left > 0) title += " (" + Ui.time(left) + " kaldı)";
-        else if (s.stopAtEnd) title += " (kayıt bitince)";
+        if (s.sleepAt > 0 && left > 0) title += " (" + Ui.time(left) + L.t(" kaldı)");
+        else if (s.stopAtEnd) title += L.t(" (kayıt bitince)");
         dlg(c).setTitle(title).setItems(names, (d, i) -> {
-            if (mins[i] < 0) { s.setStopAtEnd(); toast(c, "Bu kayıt bitince duracak"); }
+            if (mins[i] < 0) { s.setStopAtEnd(); toast(c, L.t("Bu kayıt bitince duracak")); }
             else {
                 s.setSleep(mins[i]);
-                toast(c, mins[i] == 0 ? "Uyku zamanlayıcı kapatıldı" : names[i] + " sonra duracak");
+                toast(c, mins[i] == 0 ? L.t("Uyku zamanlayıcı kapatıldı") : names[i] + L.t(" sonra duracak"));
             }
         }).show();
     }
@@ -409,9 +410,9 @@ public class Ui {
             t.setOnClickListener(v -> sb.setProgress((p - 25) / 5));
         }
         box.addView(hs);
-        dlg(c).setTitle("Oynatma hızı").setView(box)
-                .setPositiveButton("Tamam", (d, w) -> s.save())
-                .setNeutralButton("Sıfırla", (d, w) -> { s.speed = 100; s.applySpeed(); s.save(); })
+        dlg(c).setTitle(L.t("Oynatma hızı")).setView(box)
+                .setPositiveButton(L.t("Tamam"), (d, w) -> s.save())
+                .setNeutralButton(L.t("Sıfırla"), (d, w) -> { s.speed = 100; s.applySpeed(); s.save(); })
                 .show();
     }
 
@@ -421,7 +422,7 @@ public class Ui {
 
     public static void jumpDialog(Context c, PlayerService s) {
         int dur = s.duration();
-        if (dur <= 0) { toast(c, "Kayıt henüz hazır değil"); return; }
+        if (dur <= 0) { toast(c, L.t("Kayıt henüz hazır değil")); return; }
         int pos = s.position() / 1000;
         boolean hours = dur >= 3600000;
         LinearLayout box = new LinearLayout(c);
@@ -435,12 +436,12 @@ public class Ui {
         box.addView(pm);
         box.addView(sep(c));
         box.addView(ps);
-        dlg(c).setTitle("Sıçranacak zaman (en fazla " + Ui.time(dur) + ")").setView(box)
-                .setPositiveButton("Git", (d, w) -> {
+        dlg(c).setTitle(L.t("Sıçranacak zaman (en fazla ") + Ui.time(dur) + ")").setView(box)
+                .setPositiveButton(L.t("Git"), (d, w) -> {
                     int ms = ((hours ? ph.getValue() * 3600 : 0) + pm.getValue() * 60 + ps.getValue()) * 1000;
                     s.seek(Math.min(ms, dur - 500));
                 })
-                .setNegativeButton("İptal", null).show();
+                .setNegativeButton(L.t("İptal"), null).show();
     }
 
     private static TextView sep(Context c) {
@@ -454,24 +455,24 @@ public class Ui {
         if (t == null) return;
         final List<Integer> bm = Lib.bookmarks(c, t.uri);
         List<String> rows = new ArrayList<>();
-        for (int i = 0; i < bm.size(); i++) rows.add("Yer imi " + (i + 1) + "   —   " + Ui.time(bm.get(i)));
+        for (int i = 0; i < bm.size(); i++) rows.add(L.t("Yer imi ") + (i + 1) + "   —   " + Ui.time(bm.get(i)));
         ListView lv = new ListView(c);
         lv.setAdapter(new ArrayAdapter<>(c, android.R.layout.simple_list_item_1, rows));
-        AlertDialog.Builder b = dlg(c).setTitle("Yer imleri")
-                .setPositiveButton("Şu anı ekle", (d, w) -> {
+        AlertDialog.Builder b = dlg(c).setTitle(L.t("Yer imleri"))
+                .setPositiveButton(L.t("Şu anı ekle"), (d, w) -> {
                     bm.add(s.position());
                     Lib.setBookmarks(c, t.uri, bm);
-                    toast(c, "Yer imi eklendi: " + Ui.time(s.position()));
+                    toast(c, L.t("Yer imi eklendi: ") + Ui.time(s.position()));
                 })
-                .setNegativeButton("Kapat", null);
-        if (rows.isEmpty()) b.setMessage("Henüz yer imi yok.\n\"Şu anı ekle\" ile bulunduğunuz yeri kaydedin. Yer imine dokununca oraya gidilir, basılı tutunca silinir.");
+                .setNegativeButton(L.t("Kapat"), null);
+        if (rows.isEmpty()) b.setMessage(L.t("Henüz yer imi yok.\n\"Şu anı ekle\" ile bulunduğunuz yeri kaydedin. Yer imine dokununca oraya gidilir, basılı tutunca silinir."));
         else b.setView(lv);
         final AlertDialog d = b.show();
         lv.setOnItemClickListener((p, v, i, id) -> { s.seek(bm.get(i)); d.dismiss(); });
         lv.setOnItemLongClickListener((p, v, i, id) -> {
             bm.remove(i);
             Lib.setBookmarks(c, t.uri, bm);
-            toast(c, "Yer imi silindi");
+            toast(c, L.t("Yer imi silindi"));
             d.dismiss();
             bookmarksDialog(c, s);
             return true;
@@ -480,40 +481,40 @@ public class Ui {
 
     public static void abRepeat(Context c, PlayerService s) {
         int r = s.abStep();
-        if (r == 1) toast(c, "A noktası: " + Ui.time(s.abA) + ". B noktası için tekrar seçin.");
-        else if (r == 2) toast(c, "A-B yineleme: " + Ui.time(s.abA) + " – " + Ui.time(s.abB));
-        else toast(c, "A-B yineleme kapatıldı");
+        if (r == 1) toast(c, L.t("A noktası: ") + Ui.time(s.abA) + L.t(". B noktası için tekrar seçin."));
+        else if (r == 2) toast(c, L.t("A-B yineleme: ") + Ui.time(s.abA) + " – " + Ui.time(s.abB));
+        else toast(c, L.t("A-B yineleme kapatıldı"));
     }
 
     public static void savePlaylistDialog(Context c, List<Track> tracks) {
-        if (tracks.isEmpty()) { toast(c, "Liste boş"); return; }
+        if (tracks.isEmpty()) { toast(c, L.t("Liste boş")); return; }
         final EditText e = new EditText(c);
-        e.setHint("Liste adı");
+        e.setHint(L.t("Liste adı"));
         e.setSingleLine(true);
         e.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         LinearLayout box = new LinearLayout(c);
         box.setPadding(dp(c, 20), dp(c, 8), dp(c, 20), 0);
         box.addView(e, new LinearLayout.LayoutParams(MP, WC));
-        dlg(c).setTitle("Listeyi kaydet").setView(box)
-                .setPositiveButton("Kaydet", (d, w) -> {
+        dlg(c).setTitle(L.t("Listeyi kaydet")).setView(box)
+                .setPositiveButton(L.t("Kaydet"), (d, w) -> {
                     String n = e.getText().toString().trim();
-                    if (n.isEmpty()) n = "Liste " + (Lib.playlistNames(c).size() + 1);
+                    if (n.isEmpty()) n = L.t("Liste ") + (Lib.playlistNames(c).size() + 1);
                     Lib.savePlaylist(c, n, tracks);
-                    toast(c, "\"" + n + "\" kaydedildi (" + tracks.size() + " kayıt)");
+                    toast(c, "\"" + n + L.t("\" kaydedildi (") + tracks.size() + L.t(" kayıt)"));
                 })
-                .setNegativeButton("İptal", null).show();
+                .setNegativeButton(L.t("İptal"), null).show();
     }
 
     public static void addToPlaylistDialog(Context c, List<Track> tracks) {
         final List<String> names = Lib.playlistNames(c);
         String[] items = new String[names.size() + 1];
-        items[0] = "+ Yeni liste";
+        items[0] = L.t("+ Yeni liste");
         for (int i = 0; i < names.size(); i++) items[i + 1] = names.get(i);
-        dlg(c).setTitle("Listeye ekle").setItems(items, (d, i) -> {
+        dlg(c).setTitle(L.t("Listeye ekle")).setItems(items, (d, i) -> {
             if (i == 0) savePlaylistDialog(c, tracks);
             else {
                 Lib.addToPlaylist(c, names.get(i - 1), tracks);
-                toast(c, names.get(i - 1) + " listesine eklendi");
+                toast(c, names.get(i - 1) + L.t(" listesine eklendi"));
             }
         }).show();
     }
@@ -521,28 +522,28 @@ public class Ui {
     public static void infoDialog(Context c, Track t, PlayerService s) {
         if (t == null) return;
         StringBuilder b = new StringBuilder();
-        b.append("Ad: ").append(t.title).append("\n\n");
-        if (!t.video && !t.artist.isEmpty()) b.append("Sanatçı: ").append(t.artist).append("\n");
-        if (!t.video && !t.album.isEmpty()) b.append("Albüm: ").append(t.album).append("\n");
+        b.append(L.t("Ad: ")).append(t.title).append("\n\n");
+        if (!t.video && !t.artist.isEmpty()) b.append(L.t("Sanatçı: ")).append(t.artist).append("\n");
+        if (!t.video && !t.album.isEmpty()) b.append(L.t("Albüm: ")).append(t.album).append("\n");
         long dur = t.dur > 0 ? t.dur : (s != null && s.current() == t ? s.duration() : 0);
-        b.append("Süre: ").append(Ui.time(dur)).append("\n");
+        b.append(L.t("Süre: ")).append(Ui.time(dur)).append("\n");
         int w = t.w, h = t.h;
         if (s != null && s.current() == t && s.vw > 0) { w = s.vw; h = s.vh; }
-        if (t.video && w > 0) b.append("Çözünürlük: ").append(w).append(" × ").append(h).append("\n");
-        b.append("Boyut: ").append(size(t.size)).append("\n");
-        if (!t.mime.isEmpty()) b.append("Biçim: ").append(t.mime).append("\n");
-        b.append("Klasör: ").append(Lib.folderName(t.folder)).append("\n\n");
-        b.append("Konum: ").append(t.path.isEmpty() ? t.uri.toString() : t.path);
-        dlg(c).setTitle(t.video ? "Görüntü bilgileri" : "Kayıt bilgileri").setMessage(b.toString())
-                .setPositiveButton("Tamam", null).show();
+        if (t.video && w > 0) b.append(L.t("Çözünürlük: ")).append(w).append(" × ").append(h).append("\n");
+        b.append(L.t("Boyut: ")).append(size(t.size)).append("\n");
+        if (!t.mime.isEmpty()) b.append(L.t("Biçim: ")).append(t.mime).append("\n");
+        b.append(L.t("Klasör: ")).append(Lib.folderName(t.folder)).append("\n\n");
+        b.append(L.t("Konum: ")).append(t.path.isEmpty() ? t.uri.toString() : t.path);
+        dlg(c).setTitle(t.video ? L.t("Görüntü bilgileri") : L.t("Kayıt bilgileri")).setMessage(b.toString())
+                .setPositiveButton(L.t("Tamam"), null).show();
     }
 
     public static void shareInfo(Context c, Track t) {
         if (t == null) return;
-        String msg = (t.video ? "Şu anda izliyorum: " : "Şu anda dinliyorum: ") + t.title
+        String msg = (t.video ? L.t("Şu anda izliyorum: ") : L.t("Şu anda dinliyorum: ")) + t.title
                 + (t.artist.isEmpty() || t.video ? "" : " – " + t.artist);
         Intent i = new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, msg);
-        try { c.startActivity(Intent.createChooser(i, "Paylaş")); } catch (Exception ignored) {}
+        try { c.startActivity(Intent.createChooser(i, L.t("Paylaş"))); } catch (Exception ignored) {}
     }
 
     public static void shareFile(Context c, Track t) {
@@ -550,7 +551,7 @@ public class Ui {
                 .setType(t.mime.isEmpty() ? (t.video ? "video/*" : "audio/*") : t.mime)
                 .putExtra(Intent.EXTRA_STREAM, t.uri)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        try { c.startActivity(Intent.createChooser(i, "Dosyayı paylaş")); } catch (Exception ignored) {}
+        try { c.startActivity(Intent.createChooser(i, L.t("Dosyayı paylaş"))); } catch (Exception ignored) {}
     }
 
     public static void controlSettings(Context c, boolean video) {
@@ -558,13 +559,13 @@ public class Ui {
         LinearLayout box = new LinearLayout(c);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(c, 20), dp(c, 8), dp(c, 20), 0);
-        sw(box, "Kulaklık çıkınca duraklat", sp, "unplug", true);
-        sw(box, "Videoya kaldığı yerden devam et", sp, "resume", true);
-        sw(box, "Ses ve parlaklık için kaydırma", sp, "gestures", true);
-        sw(box, "Çift dokunuşla ileri / geri sar", sp, "dtap", true);
-        sw(box, "Video ekranında kalan süreyi göster", sp, "remain", false);
-        sw(box, "Video ekranından çıkınca ses arka planda sürsün", sp, "bgvideo", false);
-        TextView l = text(c, "İleri / geri atlama süresi", 15, TXT, false);
+        sw(box, L.t("Kulaklık çıkınca duraklat"), sp, "unplug", true);
+        sw(box, L.t("Videoya kaldığı yerden devam et"), sp, "resume", true);
+        sw(box, L.t("Ses ve parlaklık için kaydırma"), sp, "gestures", true);
+        sw(box, L.t("Çift dokunuşla ileri / geri sar"), sp, "dtap", true);
+        sw(box, L.t("Video ekranında kalan süreyi göster"), sp, "remain", false);
+        sw(box, L.t("Video ekranından çıkınca ses arka planda sürsün"), sp, "bgvideo", false);
+        TextView l = text(c, L.t("İleri / geri atlama süresi"), 15, TXT, false);
         l.setPadding(0, dp(c, 14), 0, dp(c, 6));
         box.addView(l);
         final int[] secs = {5, 10, 15, 20, 30, 60};
@@ -572,7 +573,7 @@ public class Ui {
         final List<TextView> chips = new ArrayList<>();
         int cur = sp.getInt("seekSec", 10);
         for (int s : secs) {
-            TextView t = text(c, s + " sn", 14, TXT, false);
+            TextView t = text(c, s + L.t(" sn"), 14, TXT, false);
             t.setPadding(dp(c, 10), dp(c, 7), dp(c, 10), dp(c, 7));
             t.setBackground(round(s == cur ? ORANGE : (LIGHT ? FIELD : 0xFF3A3A3A), dp(c, 14)));
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(WC, WC);
@@ -590,7 +591,7 @@ public class Ui {
         box.addView(hs);
         ScrollView sv = new ScrollView(c);
         sv.addView(box);
-        dlg(c).setTitle("Denetim ayarları").setView(sv).setPositiveButton("Tamam", null).show();
+        dlg(c).setTitle(L.t("Denetim ayarları")).setView(sv).setPositiveButton(L.t("Tamam"), null).show();
     }
 
     private static void sw(LinearLayout box, String label, SharedPreferences sp, String key, boolean def) {
@@ -606,31 +607,65 @@ public class Ui {
         box.addView(s, new LinearLayout.LayoutParams(MP, WC));
     }
 
+    /** Dil seçimi: "Sistem dili" + desteklenen diller. Seçince uygulama yeni dilde yeniden açılır. */
+    public static void languageDialog(Activity a) {
+        final SharedPreferences sp = prefs(a);
+        String cur = sp.getString("lang", "");
+        String[] items = new String[L.LANGS.length + 1];
+        items[0] = L.t("Sistem dili") + " (" + L.name(L.pick(java.util.Locale.getDefault().getLanguage())) + ")";
+        int sel = 0;
+        for (int i = 0; i < L.LANGS.length; i++) {
+            items[i + 1] = L.LANGS[i][1];
+            if (L.LANGS[i][0].equals(cur)) sel = i + 1;
+        }
+        dlg(a).setTitle(L.t("Dil") + " / Language").setSingleChoiceItems(items, sel, (d, i) -> {
+            d.dismiss();
+            String code = i == 0 ? "" : L.LANGS[i - 1][0];
+            if (code.equals(cur)) return;
+            sp.edit().putString("lang", code).commit();
+            restart(a);
+        }).show();
+    }
+
+    /** Uygulamayı yeniden başlatır (dil değişikliği tüm yazılara uygulansın diye). */
+    public static void restart(Activity a) {
+        Intent i = a.getPackageManager().getLaunchIntentForPackage(a.getPackageName());
+        if (i == null) return;
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        android.app.PendingIntent pi = android.app.PendingIntent.getActivity(a, 77, i,
+                android.app.PendingIntent.FLAG_IMMUTABLE | android.app.PendingIntent.FLAG_CANCEL_CURRENT);
+        android.app.AlarmManager am = (android.app.AlarmManager) a.getSystemService(Context.ALARM_SERVICE);
+        if (am != null) am.set(android.app.AlarmManager.RTC, System.currentTimeMillis() + 400, pi);
+        try { a.stopService(new Intent(a, PlayerService.class)); } catch (Exception ignored) {}
+        a.finishAffinity();
+        Runtime.getRuntime().exit(0);
+    }
+
     public static void tips(Context c, String title, String body) {
-        dlg(c).setTitle(title).setMessage(body).setPositiveButton("Anladım", null).show();
+        dlg(c).setTitle(title).setMessage(body).setPositiveButton(L.t("Anladım"), null).show();
     }
 
     public static final String AUDIO_TIPS =
-            "• Sağ üstteki liste düğmesi çalma sırasını açar / kapatır.\n\n"
-            + "• Büyüteç ile çalma sırasında arama yapabilirsiniz.\n\n"
-            + "• Önceki düğmesine kayıt başındayken basınca önceki kayda, 4 saniyeden sonra basınca kaydın başına gider.\n\n"
-            + "• Yineleme düğmesi: kapalı → tüm liste → tek kayıt.\n\n"
-            + "• Karışık düğmesi rastgele sırayla çalar.\n\n"
-            + "• Dengeleyici menüsünden bas, tiz, ekolayzır, 8D ses ve ses yükseltmeyi ayarlayın.\n\n"
-            + "• A-B yineleme: bir kez seçin (A), sonra tekrar seçin (B); aradaki bölüm tekrar eder. Üçüncü seçim kapatır.";
+            L.t("• Sağ üstteki liste düğmesi çalma sırasını açar / kapatır.\n\n")
+            + L.t("• Büyüteç ile çalma sırasında arama yapabilirsiniz.\n\n")
+            + L.t("• Önceki düğmesine kayıt başındayken basınca önceki kayda, 4 saniyeden sonra basınca kaydın başına gider.\n\n")
+            + L.t("• Yineleme düğmesi: kapalı → tüm liste → tek kayıt.\n\n")
+            + L.t("• Karışık düğmesi rastgele sırayla çalar.\n\n")
+            + L.t("• Dengeleyici menüsünden bas, tiz, ekolayzır, 8D ses ve ses yükseltmeyi ayarlayın.\n\n")
+            + L.t("• A-B yineleme: bir kez seçin (A), sonra tekrar seçin (B); aradaki bölüm tekrar eder. Üçüncü seçim kapatır.");
 
     public static final String LIST_TIPS =
-            "• Bir kayda dokunun: o kayıt çalar.\n\n"
-            + "• Kaydın sağındaki üç nokta: listeden kaldır, yukarı / aşağı taşı, sonraki olarak çal, başka listeye ekle.\n\n"
-            + "• \"Listeyi kaydet\" ile şu anki çalma sırasını adlandırıp saklayın; \"Listeler\" sekmesinde bulursunuz.\n\n"
-            + "• Ana ekranda bir kaydın üç noktasından \"Sıraya ekle\" ile listeye kayıt ekleyebilirsiniz.";
+            L.t("• Bir kayda dokunun: o kayıt çalar.\n\n")
+            + L.t("• Kaydın sağındaki üç nokta: listeden kaldır, yukarı / aşağı taşı, sonraki olarak çal, başka listeye ekle.\n\n")
+            + L.t("• \"Listeyi kaydet\" ile şu anki çalma sırasını adlandırıp saklayın; \"Listeler\" sekmesinde bulursunuz.\n\n")
+            + L.t("• Ana ekranda bir kaydın üç noktasından \"Sıraya ekle\" ile listeye kayıt ekleyebilirsiniz.");
 
     public static final String VIDEO_TIPS =
-            "• Ekrana tek dokunuş: denetimleri gösterir / gizler.\n\n"
-            + "• Çift dokunuş: sağ tarafta ileri, sol tarafta geri sarar (süre Denetim ayarlarından değişir).\n\n"
-            + "• Sol tarafta yukarı-aşağı kaydırma: parlaklık. Sağ tarafta: ses.\n\n"
-            + "• Ekranda yatay kaydırma: videoda ileri / geri gider.\n\n"
-            + "• Kilitle: ekranı dokunmaya kapatır; açmak için ekrana dokunun, çıkan kilit düğmesini 3 saniye basılı tutun.\n\n"
-            + "• Ses olarak oynat: görüntüyü kapatıp sadece sesi çalar.\n\n"
-            + "• Açılan pencerede oynatıcı: video küçük pencerede diğer uygulamaların üstünde oynar.";
+            L.t("• Ekrana tek dokunuş: denetimleri gösterir / gizler.\n\n")
+            + L.t("• Çift dokunuş: sağ tarafta ileri, sol tarafta geri sarar (süre Denetim ayarlarından değişir).\n\n")
+            + L.t("• Sol tarafta yukarı-aşağı kaydırma: parlaklık. Sağ tarafta: ses.\n\n")
+            + L.t("• Ekranda yatay kaydırma: videoda ileri / geri gider.\n\n")
+            + L.t("• Kilitle: ekranı dokunmaya kapatır; açmak için ekrana dokunun, çıkan kilit düğmesini 3 saniye basılı tutun.\n\n")
+            + L.t("• Ses olarak oynat: görüntüyü kapatıp sadece sesi çalar.\n\n")
+            + L.t("• Açılan pencerede oynatıcı: video küçük pencerede diğer uygulamaların üstünde oynar.");
 }

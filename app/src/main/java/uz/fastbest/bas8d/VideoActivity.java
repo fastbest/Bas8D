@@ -68,7 +68,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private int scrollMode; // 0 yok, 1 parlaklık, 2 ses, 3 sarma
     private int seekTarget = -1;
 
-    private static final String[] FIT_NAMES = {"En iyi sığdır", "Ekranı doldur", "Ekrana uzat", "16:9", "4:3", "Orijinal boyut"};
+    private static final String[] FIT_NAMES = {L.t("En iyi sığdır"), L.t("Ekranı doldur"), L.t("Ekrana uzat"), "16:9", "4:3", L.t("Orijinal boyut")};
 
     private final Runnable listener = () -> h.post(() -> { refresh(); layoutVideo(); });
     private final Runnable tick = new Runnable() {
@@ -279,7 +279,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 if (x > W * 0.35f && x < W * 0.65f) { svc.toggle(); return true; }
                 boolean right = x > W / 2f;
                 svc.seekBy((right ? 1 : -1) * sec * 1000);
-                flash(right ? "+" + sec + " sn" : "-" + sec + " sn");
+                flash(right ? "+" + sec + L.t(" sn") : "-" + sec + L.t(" sn"));
                 return true;
             }
             @Override public boolean onScroll(MotionEvent a, MotionEvent b, float dx, float dy) {
@@ -308,7 +308,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                     bright = Math.max(0.01f, Math.min(1f, bright + frac * 1.5f));
                     lp.screenBrightness = bright;
                     getWindow().setAttributes(lp);
-                    flash("Parlaklık %" + Math.round(bright * 100));
+                    flash(L.t("Parlaklık %") + Math.round(bright * 100));
                 } else {
                     int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
                     volAcc += frac * max * 1.5f;
@@ -318,7 +318,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                         int v = Math.max(0, Math.min(max, am.getStreamVolume(AudioManager.STREAM_MUSIC) + step));
                         am.setStreamVolume(AudioManager.STREAM_MUSIC, v, 0);
                     }
-                    flash("Ses %" + Math.round(am.getStreamVolume(AudioManager.STREAM_MUSIC) * 100f / max));
+                    flash(L.t("Ses %") + Math.round(am.getStreamVolume(AudioManager.STREAM_MUSIC) * 100f / max));
                 }
                 return true;
             }
@@ -430,7 +430,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             if (e.getAction() == MotionEvent.ACTION_DOWN) {
                 h.removeCallbacks(hideLock);
                 holdLeft = 3;
-                flash("Kilidi açmak için basılı tutun\n3");
+                flash(L.t("Kilidi açmak için basılı tutun\n3"));
                 h.postDelayed(holdTick, 1000);
                 lockBtn.setScaleX(1.15f);
                 lockBtn.setScaleY(1.15f);
@@ -441,7 +441,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                     h.removeCallbacks(holdTick);
                     holdLeft = 0;
                     if (locked) {
-                        flash("Kilidi açmak için 3 saniye basılı tutun");
+                        flash(L.t("Kilidi açmak için 3 saniye basılı tutun"));
                         flashLock();
                     }
                 }
@@ -479,10 +479,10 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 lockBtn.setScaleX(1f);
                 lockBtn.setScaleY(1f);
                 lock(false);
-                flash("Kilit açıldı");
+                flash(L.t("Kilit açıldı"));
                 return;
             }
-            flash("Kilidi açmak için basılı tutun\n" + holdLeft);
+            flash(L.t("Kilidi açmak için basılı tutun\n") + holdLeft);
             h.postDelayed(this, 1000);
         }
     };
@@ -491,7 +491,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         if (svc == null) return;
         int sec = sp.getInt("seekSec", 10);
         svc.seekBy(dir * sec * 1000);
-        flash((dir > 0 ? "+" : "-") + sec + " sn");
+        flash((dir > 0 ? "+" : "-") + sec + L.t(" sn"));
         poke();
     }
 
@@ -507,7 +507,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         if (on) {
             showControls(false);
             flashLock();
-            Ui.toast(this, "Ekran kilitlendi. Açmak için kilit düğmesini 3 saniye basılı tutun.");
+            Ui.toast(this, L.t("Ekran kilitlendi. Açmak için kilit düğmesini 3 saniye basılı tutun."));
         } else {
             lockBtn.setVisibility(View.GONE);
             showControls(true);
@@ -576,9 +576,9 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     private void menu(View anchor) {
         if (svc == null) return;
         poke();
-        String[] labels = {"Kilitle", "Uyku zamanlayıcı", "Oynatma hızı", "Sıçranacak zaman", "Dengeleyici",
-                "Ses olarak oynat", "Açılan pencerede oynatıcı", "Yineleme kipi", "Görüntü bilgileri", "Yer imleri",
-                "A-B yineleme", "Listeyi kaydet", "Denetim ayarları", "Görüntü oynatıcı ipuçları"};
+        String[] labels = {L.t("Kilitle"), L.t("Uyku zamanlayıcı"), L.t("Oynatma hızı"), L.t("Sıçranacak zaman"), L.t("Dengeleyici"),
+                L.t("Ses olarak oynat"), L.t("Açılan pencerede oynatıcı"), L.t("Yineleme kipi"), L.t("Görüntü bilgileri"), L.t("Yer imleri"),
+                L.t("A-B yineleme"), L.t("Listeyi kaydet"), L.t("Denetim ayarları"), L.t("Görüntü oynatıcı ipuçları")};
         int[] icons = {R.drawable.ic_lock, R.drawable.ic_timer, R.drawable.ic_speed, R.drawable.ic_jump,
                 R.drawable.ic_tune, R.drawable.ic_headset, R.drawable.ic_pip, R.drawable.ic_repeat, R.drawable.ic_info,
                 R.drawable.ic_bookmark, R.drawable.ic_ab, R.drawable.ic_playlist_add, R.drawable.ic_settings,
@@ -606,14 +606,14 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
                 case 10: Ui.abRepeat(this, svc); break;
                 case 11: Ui.savePlaylistDialog(this, svc.list); break;
                 case 12: Ui.controlSettings(this, true); break;
-                default: Ui.tips(this, "Görüntü oynatıcı ipuçları", Ui.VIDEO_TIPS); break;
+                default: Ui.tips(this, L.t("Görüntü oynatıcı ipuçları"), Ui.VIDEO_TIPS); break;
             }
         });
     }
 
     private void repeatDialog() {
-        String[] items = {"Yineleme yok", "Tümünü yinele", "Bunu yinele"};
-        Ui.dlg(this).setTitle("Yineleme kipi").setSingleChoiceItems(items, svc.repeat, (d, i) -> {
+        String[] items = {L.t("Yineleme yok"), L.t("Tümünü yinele"), L.t("Bunu yinele")};
+        Ui.dlg(this).setTitle(L.t("Yineleme kipi")).setSingleChoiceItems(items, svc.repeat, (d, i) -> {
             svc.repeat = i;
             svc.save();
             d.dismiss();
@@ -622,7 +622,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     private void enterPip() {
-        if (Build.VERSION.SDK_INT < 26) { Ui.toast(this, "Bu telefon açılan pencereyi desteklemiyor"); return; }
+        if (Build.VERSION.SDK_INT < 26) { Ui.toast(this, L.t("Bu telefon açılan pencereyi desteklemiyor")); return; }
         try {
             int w = svc.vw > 0 ? svc.vw : 16, hh = svc.vh > 0 ? svc.vh : 9;
             float r = w / (float) hh;
@@ -631,7 +631,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             PictureInPictureParams p = new PictureInPictureParams.Builder().setAspectRatio(new Rational(w, hh)).build();
             enterPictureInPictureMode(p);
         } catch (Exception e) {
-            Ui.toast(this, "Açılan pencere açılamadı. Telefon ayarlarından bu uygulamaya \"pencere içinde pencere\" izni verin.");
+            Ui.toast(this, L.t("Açılan pencere açılamadı. Telefon ayarlarından bu uygulamaya \"pencere içinde pencere\" izni verin."));
         }
     }
 
@@ -645,7 +645,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             }
         } catch (Exception ignored) {}
         if (name == null) name = u.getLastPathSegment();
-        if (name == null) return "Video";
+        if (name == null) return L.t("Video");
         int dot = name.lastIndexOf('.');
         return dot > 0 ? name.substring(0, dot) : name;
     }

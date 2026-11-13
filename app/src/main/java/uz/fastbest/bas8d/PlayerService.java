@@ -154,7 +154,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         else registerReceiver(noisy, f);
 
         if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel ch = new NotificationChannel("calma", "Oynatma", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel ch = new NotificationChannel("calma", L.t("Oynatma"), NotificationManager.IMPORTANCE_LOW);
             ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(ch);
         }
     }
@@ -607,11 +607,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 .setShowWhen(false)
                 .setOngoing(playing)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .addAction(android.R.drawable.ic_media_previous, "Önceki", action("prev", 1))
+                .addAction(android.R.drawable.ic_media_previous, L.t("Önceki"), action("prev", 1))
                 .addAction(playing ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play,
-                        playing ? "Duraklat" : "Çal", action("toggle", 2))
-                .addAction(android.R.drawable.ic_media_next, "Sonraki", action("next", 3))
-                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Kapat", action("close", 4))
+                        playing ? L.t("Duraklat") : L.t("Çal"), action("toggle", 2))
+                .addAction(android.R.drawable.ic_media_next, L.t("Sonraki"), action("next", 3))
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, L.t("Kapat"), action("close", 4))
                 .setStyle(new Notification.MediaStyle().setShowActionsInCompactView(0, 1, 2));
         return b.build();
     }

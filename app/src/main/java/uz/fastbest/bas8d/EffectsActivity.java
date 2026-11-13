@@ -65,14 +65,14 @@ public class EffectsActivity extends Activity {
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(dp(4), dp(6), dp(12), dp(6));
         bar.addView(Ui.btn(this, R.drawable.ic_back, TXT, 24, 12, v -> finish()));
-        TextView t = text("Dengeleyici", 20, TXT, true);
+        TextView t = text(L.t("Dengeleyici"), 20, TXT, true);
         t.setPadding(dp(8), 0, 0, 0);
         bar.addView(t);
         root.addView(bar);
 
         LinearLayout tabRow = new LinearLayout(this);
         tabRow.setBackgroundColor(Ui.BAR);
-        String[] names = {"EKOLAYZIR", "8D VE EFEKTLER"};
+        String[] names = {L.t("EKOLAYZIR"), L.t("8D VE EFEKTLER")};
         tabs = new TextView[names.length];
         for (int i = 0; i < names.length; i++) {
             final int k = i;
@@ -247,8 +247,8 @@ public class EffectsActivity extends Activity {
 
     // ---------- ekolayzır sekmesi ----------
 
-    private static final String[] PRESET_NAMES = {"Düz", "Güçlü bas", "Güçlü tiz", "Kulaklık", "Rock", "Pop",
-            "Vokal", "Dans", "Klasik"};
+    private static final String[] PRESET_NAMES = {L.t("Düz"), L.t("Güçlü bas"), L.t("Güçlü tiz"), L.t("Kulaklık"), L.t("Rock"), L.t("Pop"),
+            L.t("Vokal"), L.t("Dans"), L.t("Klasik")};
     private static final int[][] PRESETS = {
             {0, 0, 0, 0, 0}, {7, 4, 0, 0, 0}, {0, 0, 0, 4, 7}, {5, 2, 0, 2, 4}, {5, 3, -1, 3, 5},
             {-1, 2, 4, 2, -1}, {-2, 0, 4, 3, 0}, {6, 3, 0, 2, 4}, {4, 2, 0, 2, 4}};
@@ -257,16 +257,16 @@ public class EffectsActivity extends Activity {
         ScrollView sv = new ScrollView(this);
         LinearLayout p = page(sv);
 
-        LinearLayout c1 = card(p, "Bas ve Tiz", "Hızlı ayar: bası ve tizi tek kaydırıcıyla güçlendirin.");
-        slider(c1, "Bas", 0, 100, svc.bass, pct, new IntCb() {
+        LinearLayout c1 = card(p, L.t("Bas ve Tiz"), L.t("Hızlı ayar: bası ve tizi tek kaydırıcıyla güçlendirin."));
+        slider(c1, L.t("Bas"), 0, 100, svc.bass, pct, new IntCb() {
             @Override public void on(int v) { svc.bass = v; svc.applyEq(); }
         });
-        slider(c1, "Tiz (treble)", 0, 100, svc.treble, pct, new IntCb() {
+        slider(c1, L.t("Tiz (treble)"), 0, 100, svc.treble, pct, new IntCb() {
             @Override public void on(int v) { svc.treble = v; svc.applyEq(); }
         });
 
         if (svc.hasEq()) {
-            LinearLayout c2 = card(p, "Ekolayzır", "Hazır ayar seçin veya bantları tek tek ayarlayın.");
+            LinearLayout c2 = card(p, L.t("Ekolayzır"), L.t("Hazır ayar seçin veya bantları tek tek ayarlayın."));
             chips(c2, PRESET_NAMES, -1, new IntCb() {
                 @Override public void on(int k) {
                     svc.usePreset(PRESETS[k]);
@@ -287,7 +287,7 @@ public class EffectsActivity extends Activity {
                 });
             }
         } else {
-            card(p, "Ekolayzır", "Bu telefon ekolayzırı desteklemiyor.");
+            card(p, L.t("Ekolayzır"), L.t("Bu telefon ekolayzırı desteklemiyor."));
         }
         return sv;
     }
@@ -298,9 +298,9 @@ public class EffectsActivity extends Activity {
         ScrollView sv = new ScrollView(this);
         LinearLayout p = page(sv);
 
-        LinearLayout c8 = card(p, "8D Ses", "Ses kulaklıkta başınızın etrafında döner. Kulaklıkla dinleyin.");
+        LinearLayout c8 = card(p, L.t("8D Ses"), L.t("Ses kulaklıkta başınızın etrafında döner. Kulaklıkla dinleyin."));
         Switch sw = new Switch(this);
-        sw.setText("8D açık");
+        sw.setText(L.t("8D açık"));
         sw.setTextColor(TXT);
         sw.setTextSize(14);
         sw.setChecked(svc.d8);
@@ -321,15 +321,15 @@ public class EffectsActivity extends Activity {
             }
         });
         c8.addView(sw);
-        slider(c8, "Dönüş süresi", 3, 20, svc.period, new Fmt() {
-            @Override public String f(int v) { return v + " sn"; }
+        slider(c8, L.t("Dönüş süresi"), 3, 20, svc.period, new Fmt() {
+            @Override public String f(int v) { return v + L.t(" sn"); }
         }, new IntCb() {
             @Override public void on(int v) { svc.period = v; }
         });
 
-        LinearLayout cb = card(p, "Ses yükseltme", "Telefonun en yüksek sesinin üstüne çıkar. Yüksek ayarda ses bozulabilir; uzun süre çok yüksek sesle dinlemek kulağa zarar verir.");
+        LinearLayout cb = card(p, L.t("Ses yükseltme"), L.t("Telefonun en yüksek sesinin üstüne çıkar. Yüksek ayarda ses bozulabilir; uzun süre çok yüksek sesle dinlemek kulağa zarar verir."));
         if (svc.hasBoost()) {
-            slider(cb, "Güçlendirme", 0, 100, svc.boost, new Fmt() {
+            slider(cb, L.t("Güçlendirme"), 0, 100, svc.boost, new Fmt() {
                 @Override public String f(int v) {
                     return String.format(Locale.US, "+%.1f dB", v * 0.15f);
                 }
@@ -337,46 +337,46 @@ public class EffectsActivity extends Activity {
                 @Override public void on(int v) { svc.boost = v; svc.applyBoost(); }
             });
         } else {
-            cb.addView(text("Bu telefon ses yükseltmeyi desteklemiyor.", 13, SUB, false));
+            cb.addView(text(L.t("Bu telefon ses yükseltmeyi desteklemiyor."), 13, SUB, false));
         }
 
-        LinearLayout cs = card(p, "Surround ve Yankı", null);
+        LinearLayout cs = card(p, L.t("Surround ve Yankı"), null);
         if (svc.hasSurround()) {
-            slider(cs, "Surround (3D genişlik)", 0, 100, svc.surround, pct, new IntCb() {
+            slider(cs, L.t("Surround (3D genişlik)"), 0, 100, svc.surround, pct, new IntCb() {
                 @Override public void on(int v) { svc.surround = v; svc.applySurround(); }
             });
         }
         if (svc.hasReverb()) {
-            TextView rl = text("Yankı", 13, TXT, false);
+            TextView rl = text(L.t("Yankı"), 13, TXT, false);
             rl.setPadding(0, dp(8), 0, 0);
             cs.addView(rl);
-            chips(cs, new String[]{"Kapalı", "Küçük oda", "Orta oda", "Büyük oda", "Salon", "Büyük salon", "Metalik"},
+            chips(cs, new String[]{L.t("Kapalı"), L.t("Küçük oda"), L.t("Orta oda"), L.t("Büyük oda"), L.t("Salon"), L.t("Büyük salon"), L.t("Metalik")},
                     svc.reverb, new IntCb() {
                         @Override public void on(int k) { svc.reverb = k; svc.applyReverb(); svc.save(); }
                     });
         }
         if (!svc.d8) {
-            slider(cs, "Sol / Sağ dengesi", -100, 100, svc.balance, new Fmt() {
+            slider(cs, L.t("Sol / Sağ dengesi"), -100, 100, svc.balance, new Fmt() {
                 @Override public String f(int v) {
-                    return v == 0 ? "Orta" : v < 0 ? "Sol %" + (-v) : "Sağ %" + v;
+                    return v == 0 ? L.t("Orta") : v < 0 ? L.t("Sol %") + (-v) : L.t("Sağ %") + v;
                 }
             }, new IntCb() {
                 @Override public void on(int v) { svc.balance = v; svc.applyVolume(); }
             });
         }
 
-        LinearLayout ch = card(p, "Hız ve Perde", "Yavaşlatılmış (slowed) veya hızlandırılmış (nightcore) dinleme.");
+        LinearLayout ch = card(p, L.t("Hız ve Perde"), L.t("Yavaşlatılmış (slowed) veya hızlandırılmış (nightcore) dinleme."));
         Fmt x = new Fmt() {
             @Override public String f(int v) { return String.format(Locale.US, "%.2fx", v / 100f); }
         };
-        slider(ch, "Hız", 50, 200, svc.speed, x, new IntCb() {
+        slider(ch, L.t("Hız"), 50, 200, svc.speed, x, new IntCb() {
             @Override public void on(int v) { svc.speed = v; svc.applySpeed(); }
         });
-        slider(ch, "Perde (ses inceliği)", 50, 150, svc.pitch, x, new IntCb() {
+        slider(ch, L.t("Perde (ses inceliği)"), 50, 150, svc.pitch, x, new IntCb() {
             @Override public void on(int v) { svc.pitch = v; svc.applySpeed(); }
         });
 
-        TextView reset = text("Tüm ayarları sıfırla", 14, TXT, true);
+        TextView reset = text(L.t("Tüm ayarları sıfırla"), 14, TXT, true);
         reset.setGravity(Gravity.CENTER);
         reset.setBackground(round((Ui.LIGHT ? Ui.FIELD : 0xFF3A3A3A), 14));
         reset.setPadding(0, dp(12), 0, dp(12));
@@ -390,7 +390,7 @@ public class EffectsActivity extends Activity {
                 for (int i = 0; i < svc.bands.length; i++) svc.bands[i] = 0;
                 svc.applyAll();
                 svc.save();
-                toast("Ayarlar sıfırlandı");
+                toast(L.t("Ayarlar sıfırlandı"));
                 rebuild();
             }
         });
