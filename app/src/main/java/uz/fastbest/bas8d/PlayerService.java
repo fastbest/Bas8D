@@ -600,7 +600,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 new Intent(this, target), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
         boolean playing = isPlaying();
         b.setSmallIcon(R.drawable.ic_note)
-                .setContentTitle(t == null ? "Bas8D" : t.title)
+                .setContentTitle(t == null ? "Myplayer" : t.title)
                 .setContentText(t == null ? "" : t.artist)
                 .setContentIntent(open)
                 .setOnlyAlertOnce(true)

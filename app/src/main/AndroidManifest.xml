@@ -9,8 +9,9 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
-        android:label="Bas8D Oynatıcı"
-        android:icon="@drawable/ic_launcher"
+        android:label="Myplayer"
+        android:icon="@mipmap/ic_logo"
+        android:roundIcon="@mipmap/ic_logo"
         android:requestLegacyExternalStorage="true"
         android:theme="@android:style/Theme.Material.NoActionBar">
         <activity

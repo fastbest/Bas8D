@@ -169,9 +169,9 @@ public class AppearanceActivity extends Activity {
         top.setBackgroundColor(Ui.BAR);
         top.setPadding(dp(14), dp(10), dp(8), dp(10));
         ImageView logo = new ImageView(this);
-        logo.setImageResource(R.drawable.ic_launcher);
+        logo.setImageResource(R.drawable.logo);
         top.addView(logo, new LinearLayout.LayoutParams(dp(30), dp(30)));
-        TextView nm = Ui.text(this, "Bas8D", 18, Ui.TXT, true);
+        TextView nm = Ui.text(this, "Myplayer", 18, Ui.TXT, true);
         nm.setPadding(dp(10), 0, 0, 0);
         top.addView(nm, new LinearLayout.LayoutParams(0, WC, 1));
         top.addView(Ui.img(this, R.drawable.ic_search, Ui.TXT, 22, 6));

@@ -19,15 +19,15 @@ jobs:
       - name: APK derle
         run: gradle assembleDebug --no-daemon
       - name: APK adini ayarla
-        run: cp app/build/outputs/apk/debug/app-debug.apk Bas8D.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk Myplayer.apk && cp Myplayer.apk Bas8D.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: Bas8D-apk
-          path: Bas8D.apk
+          name: Myplayer-apk
+          path: Myplayer.apk
       - name: Surum yayinla
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete son --yes --cleanup-tag || true
           sleep 3
-          gh release create son Bas8D.apk --title "Bas8D Muzik" --notes "En son derlenen APK" --latest
+          gh release create son Myplayer.apk Bas8D.apk --title "Myplayer" --notes "En son derlenen APK" --latest

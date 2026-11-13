@@ -407,9 +407,9 @@ public class MainActivity extends Activity {
         if (stack.isEmpty()) {
             topBar.setPadding(dp(16), 0, dp(4), 0);
             ImageView logo = new ImageView(this);
-            logo.setImageResource(R.drawable.ic_launcher);
+            logo.setImageResource(R.drawable.logo);
             topBar.addView(logo, new LinearLayout.LayoutParams(dp(40), dp(40)));
-            TextView t = Ui.text(this, "Bas8D", 26, TXT, true);
+            TextView t = Ui.text(this, "Myplayer", 26, TXT, true);
             t.setPadding(dp(16), 0, 0, 0);
             topBar.addView(t, new LinearLayout.LayoutParams(0, WC, 1));
         } else {
@@ -745,7 +745,7 @@ public class MainActivity extends Activity {
                 () -> Ui.controlSettings(this, false)));
         out.add(action("Kitaplığı yenile", Lib.audio.size() + " ses, " + Lib.video.size() + " video", R.drawable.ic_refresh,
                 () -> { loadLibrary(); Ui.toast(this, "Kitaplık yenileniyor…"); }));
-        out.add(action("Hakkında", "Bas8D Oynatıcı", R.drawable.ic_info, () -> Ui.tips(this, "Bas8D Oynatıcı",
+        out.add(action("Hakkında", "Myplayer", R.drawable.ic_info, () -> Ui.tips(this, "Myplayer",
                 "Kulaklık için müzik ve video oynatıcı.\n\nBas, tiz, ekolayzır, 8D ses, ses yükseltme, surround, yankı, hız ve perde ayarları hem müzikte hem videoda çalışır.")));
         return out;
     }
