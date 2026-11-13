@@ -46,7 +46,7 @@ import static uz.fastbest.bas8d.Ui.WC;
 /** VLC tarzı video oynatıcı. */
 public class VideoActivity extends Activity implements SurfaceHolder.Callback {
 
-    private static final int TXT = 0xFFFFFFFF;
+    private int TXT = 0xFFFFFFFF;
 
     private PlayerService svc;
     private final Handler h = new Handler(Looper.getMainLooper());
@@ -104,8 +104,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         am = (AudioManager) getSystemService(AUDIO_SERVICE);
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        getWindow().setStatusBarColor(0xFF000000);
-        getWindow().setNavigationBarColor(0xFF000000);
+        Ui.apply(this);
+        TXT = Ui.TXT;
         if (Build.VERSION.SDK_INT >= 28) {
             WindowManager.LayoutParams lp = getWindow().getAttributes();
             lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -256,7 +256,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
 
     private void buildUi() {
         root = new FrameLayout(this);
-        root.setBackgroundColor(0xFF000000);
+        root.setBackground(Ui.pageBg());
 
         surface = new SurfaceView(this);
         surface.getHolder().addCallback(this);
@@ -337,15 +337,18 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         info = Ui.text(this, "", 20, TXT, true);
         info.setGravity(Gravity.CENTER);
         info.setPadding(dp(20), dp(12), dp(20), dp(12));
-        info.setBackground(Ui.round(0x99000000, dp(12)));
+        info.setBackground(Ui.round(withAlpha(Ui.GLASS ? Ui.SURF : Ui.BAR, 0xE6), dp(12)));
+        info.setTextColor(TXT);
+        info.setShadowLayer(0, 0, 0, 0);
+        info.setElevation(dp(4));
         info.setVisibility(View.GONE);
         root.addView(info, new FrameLayout.LayoutParams(WC, WC, Gravity.CENTER));
 
         // üst
         top = new LinearLayout(this);
         top.setGravity(Gravity.CENTER_VERTICAL);
-        top.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0xCC000000, 0x00000000}));
-        top.setPadding(dp(6), dp(16), dp(6), dp(30));
+        top.setBackground(panelBg(true));
+        top.setPadding(dp(6), dp(16), dp(6), dp(12));
         top.addView(Ui.btn(this, R.drawable.ic_back, TXT, 26, 10, v -> finish()));
         title = Ui.text(this, "", 18, TXT, false);
         title.setSingleLine(true);
@@ -359,8 +362,8 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         // alt
         bottom = new LinearLayout(this);
         bottom.setOrientation(LinearLayout.VERTICAL);
-        bottom.setBackground(new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP, new int[]{0xDD000000, 0x00000000}));
-        bottom.setPadding(dp(10), dp(30), dp(10), dp(12));
+        bottom.setBackground(panelBg(false));
+        bottom.setPadding(dp(10), dp(12), dp(10), dp(14));
 
         LinearLayout sr = new LinearLayout(this);
         sr.setGravity(Gravity.CENTER_VERTICAL);
@@ -371,7 +374,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             refresh();
         });
         seek = new SeekBar(this);
-        Ui.tint(seek, 0x66FFFFFF);
+        Ui.tint(seek, Ui.TRACK);
         seek.setMax(1000);
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar s, int p, boolean user) {
@@ -409,17 +412,11 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
             flash(FIT_NAMES[fit]);
             poke();
         });
-        row.addView(bLock);
-        row.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1));
-        row.addView(bBack);
-        row.addView(bPrev);
-        LinearLayout.LayoutParams pp = new LinearLayout.LayoutParams(dp(60), dp(60));
-        pp.setMargins(dp(10), 0, dp(10), 0);
-        row.addView(bPlay, pp);
-        row.addView(bNext);
-        row.addView(bFwd);
-        row.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1));
-        row.addView(bFit);
+        View[] slots = {bLock, bBack, bPrev, bPlay, bNext, bFwd, bFit};
+        for (View v : slots) {
+            int sz = v == bPlay ? dp(60) : v == bPrev || v == bNext ? dp(52) : v == bBack || v == bFwd ? dp(50) : dp(48);
+            row.addView(Ui.slot(v, sz, sz), new LinearLayout.LayoutParams(0, WC, v == bPlay ? 1.3f : 1f));
+        }
         bottom.addView(row);
         root.addView(bottom, new FrameLayout.LayoutParams(-1, WC, Gravity.BOTTOM));
 
@@ -427,7 +424,7 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
         lockBtn = new ImageView(this);
         lockBtn.setImageDrawable(Ui.icon(this, R.drawable.ic_lock, ORANGE));
         lockBtn.setPadding(dp(14), dp(14), dp(14), dp(14));
-        lockBtn.setBackground(Ui.circle(0xAA000000, ORANGE, dp(2)));
+        lockBtn.setBackground(Ui.circle(withAlpha(Ui.GLASS ? Ui.SURF : Ui.BAR, 0xDD), ORANGE, dp(2)));
         lockBtn.setVisibility(View.GONE);
         lockBtn.setOnTouchListener((v, e) -> {
             if (e.getAction() == MotionEvent.ACTION_DOWN) {
@@ -459,6 +456,19 @@ public class VideoActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     private int seekPreview = -1;
+
+    private static int withAlpha(int c, int a) { return (c & 0x00FFFFFF) | (a << 24); }
+
+    /** Üst/alt denetim paneli: temanın rengi (cam stilde renk geçişi), videonun üstünde hafif saydam. */
+    private android.graphics.drawable.Drawable panelBg(boolean topPanel) {
+        int a, b;
+        if (Ui.GLASS) { a = Ui.G1; b = Ui.G3; }
+        else { a = Ui.BAR; b = Ui.BAR; }
+        a = withAlpha(a, 0xEB);
+        b = withAlpha(b, 0xEB);
+        return new GradientDrawable(topPanel ? GradientDrawable.Orientation.TOP_BOTTOM
+                : GradientDrawable.Orientation.BOTTOM_TOP, new int[]{a, b});
+    }
     private int holdLeft;
 
     private final Runnable holdTick = new Runnable() {

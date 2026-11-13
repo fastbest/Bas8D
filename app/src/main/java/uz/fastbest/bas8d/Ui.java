@@ -171,6 +171,14 @@ public class Ui {
         return v;
     }
 
+    /** Eşit genişlikte yuva: içindeki görünüm tam ortada durur (butonları ortalamak için). */
+    public static android.widget.FrameLayout slot(View v, int wPx, int hPx) {
+        android.widget.FrameLayout f = new android.widget.FrameLayout(v.getContext());
+        if (v.getParent() != null) ((ViewGroup) v.getParent()).removeView(v);
+        f.addView(v, new android.widget.FrameLayout.LayoutParams(wPx, hPx, Gravity.CENTER));
+        return f;
+    }
+
     public static ImageView btn(Context c, int res, int color, int sizeDp, int padDp, View.OnClickListener l) {
         ImageView v = img(c, res, color, sizeDp, padDp);
         ripple(v, true);

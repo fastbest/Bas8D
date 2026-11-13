@@ -225,37 +225,33 @@ public class AudioActivity extends Activity {
         LinearLayout ctl = new LinearLayout(this);
         ctl.setGravity(Gravity.CENTER);
         ctl.setPadding(0, dp(8), 0, dp(26));
-        bShuffle = Ui.btn(this, R.drawable.ic_shuffle, TXT, 30, 12, v -> {
+        bShuffle = Ui.btn(this, R.drawable.ic_shuffle, TXT, 26, 12, v -> {
             if (svc == null) return;
             svc.shuffle = !svc.shuffle;
             svc.save();
             Ui.toast(this, svc.shuffle ? "Karışık çalma açık" : "Karışık çalma kapalı");
             refresh();
         });
-        ImageView bPrev = Ui.btn(this, R.drawable.ic_prev, TXT, 44, 10, v -> { if (svc != null) svc.prev(); });
+        ImageView bPrev = Ui.btn(this, R.drawable.ic_prev, TXT, 38, 10, v -> { if (svc != null) svc.prev(); });
         bPlay = new ImageView(this);
         bPlay.setImageDrawable(Ui.icon(this, R.drawable.ic_pause, TXT));
-        bPlay.setPadding(dp(20), dp(20), dp(20), dp(20));
+        bPlay.setPadding(dp(18), dp(18), dp(18), dp(18));
         bPlay.setBackground(Ui.circle(0, TXT, dp(3)));
         bPlay.setOnClickListener(v -> { if (svc != null) svc.toggle(); });
-        ImageView bNext = Ui.btn(this, R.drawable.ic_next, TXT, 44, 10, v -> { if (svc != null) svc.next(false); });
-        bRepeat = Ui.btn(this, R.drawable.ic_repeat, ORANGE, 34, 12, v -> {
+        ImageView bNext = Ui.btn(this, R.drawable.ic_next, TXT, 38, 10, v -> { if (svc != null) svc.next(false); });
+        bRepeat = Ui.btn(this, R.drawable.ic_repeat, ORANGE, 26, 12, v -> {
             if (svc == null) return;
             svc.repeat = (svc.repeat + 1) % 3;
             svc.save();
             Ui.toast(this, svc.repeat == 0 ? "Yineleme kapalı" : svc.repeat == 1 ? "Tümünü yinele" : "Bu kaydı yinele");
             refresh();
         });
-        ctl.addView(bShuffle);
-        LinearLayout.LayoutParams gap = new LinearLayout.LayoutParams(dp(20), 1);
-        ctl.addView(new View(this), gap);
-        ctl.addView(bPrev);
-        LinearLayout.LayoutParams pp = new LinearLayout.LayoutParams(dp(78), dp(78));
-        pp.setMargins(dp(22), 0, dp(22), 0);
-        ctl.addView(bPlay, pp);
-        ctl.addView(bNext);
-        ctl.addView(new View(this), new LinearLayout.LayoutParams(dp(20), 1));
-        ctl.addView(bRepeat);
+        ctl.setPadding(dp(8), dp(8), dp(8), dp(26));
+        ctl.addView(Ui.slot(bShuffle, dp(50), dp(50)), new LinearLayout.LayoutParams(0, WC, 1));
+        ctl.addView(Ui.slot(bPrev, dp(58), dp(58)), new LinearLayout.LayoutParams(0, WC, 1));
+        ctl.addView(Ui.slot(bPlay, dp(74), dp(74)), new LinearLayout.LayoutParams(0, WC, 1.25f));
+        ctl.addView(Ui.slot(bNext, dp(58), dp(58)), new LinearLayout.LayoutParams(0, WC, 1));
+        ctl.addView(Ui.slot(bRepeat, dp(50), dp(50)), new LinearLayout.LayoutParams(0, WC, 1));
         root.addView(ctl, new LinearLayout.LayoutParams(MP, WC));
 
         setContentView(root);

@@ -40,7 +40,7 @@
             android:launchMode="singleTask"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
+            android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
