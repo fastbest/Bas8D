@@ -88,54 +88,25 @@ public class CurvedNav extends View {
         return t < 0.5f ? 4 * t * t * t : 1 - (float) Math.pow(-2 * t + 2, 3) / 2;
     }
 
-    private static float back(float t) { // hafif aşma (yaylanma)
-        float c1 = 1.70158f, c3 = c1 + 1;
-        return 1 + c3 * (float) Math.pow(t - 1, 3) + c1 * (float) Math.pow(t - 1, 2);
-    }
 
     @Override protected void onDraw(Canvas c) {
         float W = getWidth(), top = rise, H = getHeight();
         float ax = slotX(from), bx = slotX(sel);
+        boolean moving = from != sel && p < 1f;
 
-        // oyuk konumu ve şekli: ortada sığlaşıp uzar (sıvı)
-        float mp = Math.max(0f, Math.min(1f, (p - 0.12f) / 0.7f));
-        float cx = ax + (bx - ax) * ease(mp);
-        float wave = (float) Math.sin(Math.PI * mp);
-        if (from == sel) wave = 0;
+        // oyuk yuvarlakla birlikte kayar; boş oyuk ya da arkada dalga kalmaz
+        float e = moving ? ease(p) : 1f;
+        float cx = ax + (bx - ax) * e;
+        float wave = moving ? (float) Math.sin(Math.PI * p) : 0f;
         float nr = cr + gap;
-        float depth = nr * (1.08f - 0.62f * wave);
-        float spread = nr * (1.55f + 0.9f * wave);
+        float depth = nr * 1.08f;
+        float spread = nr * (1.55f + 0.25f * wave);
 
         path.reset();
         path.moveTo(0, top);
         path.lineTo(cx - spread, top);
         path.cubicTo(cx - spread * 0.45f, top, cx - nr * 0.95f, top + depth, cx, top + depth);
         path.cubicTo(cx + nr * 0.95f, top + depth, cx + spread * 0.45f, top, cx + spread, top);
-        // sıvı geçişte arkada küçük bir dalga
-        if (wave > 0.05f) {
-            float dir = Math.signum(bx - ax);
-            float tr = nr * 0.45f * wave;
-            float tx = cx - dir * (spread + tr * 2.4f);
-            if (dir > 0) {
-                path.reset();
-                path.moveTo(0, top);
-                path.lineTo(tx - tr * 2, top);
-                path.cubicTo(tx - tr, top, tx - tr, top + tr, tx, top + tr);
-                path.cubicTo(tx + tr, top + tr, tx + tr, top, tx + tr * 2, top);
-                path.lineTo(cx - spread, top);
-                path.cubicTo(cx - spread * 0.45f, top, cx - nr * 0.95f, top + depth, cx, top + depth);
-                path.cubicTo(cx + nr * 0.95f, top + depth, cx + spread * 0.45f, top, cx + spread, top);
-            } else {
-                path.reset();
-                path.moveTo(0, top);
-                path.lineTo(cx - spread, top);
-                path.cubicTo(cx - spread * 0.45f, top, cx - nr * 0.95f, top + depth, cx, top + depth);
-                path.cubicTo(cx + nr * 0.95f, top + depth, cx + spread * 0.45f, top, cx + spread, top);
-                path.lineTo(tx - tr * 2, top);
-                path.cubicTo(tx - tr, top, tx - tr, top + tr, tx, top + tr);
-                path.cubicTo(tx + tr, top + tr, tx + tr, top, tx + tr * 2, top);
-            }
-        }
         path.lineTo(W, top);
         path.lineTo(W, H);
         path.lineTo(0, H);
@@ -145,12 +116,12 @@ public class CurvedNav extends View {
         int isz = Ui.dp(getContext(), 26);
         float iconY = top + barH / 2f - Ui.dp(getContext(), 7);
 
-        // seçili olmayan simgeler
+        // seçili olmayan simgeler: yuvarlak üstlerinden geçerken gizlenir
         for (int i = 0; i < icons.length; i++) {
             float x = slotX(i);
-            float alpha = 1f;
-            if (i == sel) alpha = from == sel ? 0f : Math.max(0f, 1f - p * 2.2f);
-            else if (i == from && from != sel) alpha = Math.max(0f, Math.min(1f, (p - 0.35f) / 0.4f));
+            float dist = Math.abs(x - cx) / (nr * 1.6f);
+            float alpha = Math.min(1f, Math.max(0f, dist - 0.35f));
+            if (!moving && i == sel) alpha = 0f;
             if (alpha <= 0f) continue;
             Drawable d = dr[i];
             d.setTint(Ui.ICON);
@@ -162,25 +133,18 @@ public class CurvedNav extends View {
         }
 
         float restY = top + depth - nr;
-        // eski yuvarlak batar
-        if (from != sel && p < 0.4f) {
-            float t = p / 0.4f;
-            float s = 1f - ease(t);
-            drawBubble(c, ax, restY + (barH * 0.55f) * ease(t), s, from, 0);
-        }
-        // yeni yuvarlak yükselir
-        if (from == sel || p > 0.55f) {
-            float t = from == sel ? 1f : (p - 0.55f) / 0.45f;
-            float s = from == sel ? 1f : back(Math.min(1f, t));
-            float y = restY + (1f - Math.min(1f, ease(t))) * barH * 0.6f;
-            float rot = from == sel ? 0f : (1f - Math.min(1f, ease(t))) * -180f;
-            drawBubble(c, bx, y, s, sel, rot);
-            if (t >= 1f || from == sel) {
-                label.setAlpha(255);
-                label.setColor(Ui.ORANGE);
-                c.drawText(labels[sel], bx, iconY + isz / 2f + Ui.dp(getContext(), 14), label);
-                label.setColor(Ui.ICON);
-            }
+        if (moving) {
+            // yuvarlak kayarken hafifçe çubuğa iner, simge dönerek değişir
+            float y = restY + wave * barH * 0.18f;
+            float s = 1f - 0.12f * wave;
+            if (p < 0.5f) drawBubble(c, cx, y, s, from, p * 2f * 180f);
+            else drawBubble(c, cx, y, s, sel, (p - 1f) * 2f * 180f);
+        } else {
+            drawBubble(c, bx, restY, 1f, sel, 0f);
+            label.setAlpha(255);
+            label.setColor(Ui.ORANGE);
+            c.drawText(labels[sel], bx, iconY + isz / 2f + Ui.dp(getContext(), 14), label);
+            label.setColor(Ui.ICON);
         }
     }
 
